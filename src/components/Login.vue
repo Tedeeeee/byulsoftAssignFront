@@ -2,11 +2,14 @@
   <q-page class="login-page">
     <q-card class="login-card" flat bordered>
       <q-card-section class="q-pt-none">
-        <h4>로그인</h4>
+        <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
           <q-input v-model="email" label="Email" type="email" outlined class="q-mb-md" />
           <q-input v-model="password" label="Password" type="password" outlined class="q-mb-md" />
           <q-btn label="Login" type="submit" color="primary" class="full-width" />
+          <div class="text-center q-mt-md">
+            <q-btn flat label="혹시 회원이 아니신가요?" to="/signUp" class="custom-link" />
+          </div>
         </q-form>
       </q-card-section>
     </q-card>
@@ -37,5 +40,19 @@ const handleSubmit = () => {
 .login-card {
   width: 100%;
   max-width: 400px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.custom-link {
+  text-decoration: underline;
+  color: red;
+  cursor: pointer;
 }
 </style>

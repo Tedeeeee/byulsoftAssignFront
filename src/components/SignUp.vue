@@ -25,7 +25,7 @@
             type="password"
             outlined
             lazy-rules
-            :rules="[val => (val && val.length > 0) || '비밀번호를 입력해주세요']"
+            :rules="checkPassword"
             class="q-mb-md"
           />
           <q-input
@@ -94,7 +94,7 @@ const signUpData = ref<UserRegistData>({
   username: '',
   nickname: '',
   nicknameCheck: false,
-  phoneNum: 0,
+  phoneNum: '',
 });
 
 const emailRules = [
@@ -107,6 +107,11 @@ const nicknameRules = [
 ];
 
 const checkPassword = [
+  val => (val && val.length > 0) || '비밀번호를 입력해주세요',
+  val => /^(?=.*[A-Z])(?=.*[!@#$%^*+=-]).{6,}$/.test(val) || '대문자와 지정된 특수문자를 최소 하나씩 포함하고, 6글자 이상이어야 합니다',
+];
+
+const checkComfirmPassword = [
   val => (val && val.length > 0) || '비밀번호를 입력해주세요',
   val => signUpData.value.password === signUpData.value.confirmPassword || '비밀번호가 일치하지 않습니다',
 ];
@@ -160,19 +165,30 @@ const handleSubmit = async () => {
   const userData = ref<UserData>({
     email: signUpData.value.email,
     password: signUpData.value.password,
-    username: signUpData.value.username,
-    nickName: signUpData.value.nickname,
-    phoneNumbrer: signUpData.value.phoneNum,
+    name: signUpData.value.username,
+    nickname: signUpData.value.nickname,
+    phoneNumber: signUpData.value.phoneNum,
   });
 
   // 서버에서 이메일과 닉네임을 한 번 더 체크한다.
   axios
-    .post('http://localhost:8080/members/register', userData)
+    .post('http://localhost:8080/members/register', userData.value)
     .then(response => {
+      // 게시판으로 이동하고 로그인과 회원가입을 닉네임으로 변경
       console.log(response);
     })
     .catch(error => {
-      console.log(error);
+      const errorMessage = error.response.data.message;
+      console.log(error.response.data.message);
+      if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
+        alert('이메일 중복 체크를 다시 진행해주세요');
+        signUpData.value.email = '';
+        signUpData.value.emailCheck = false;
+      } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
+        alert('닉네임 중복 체크를 다시 진행해주세요');
+        signUpData.value.nickname = '';
+        signUpData.value.nicknameCheck = false;
+      }
     });
 };
 </script>

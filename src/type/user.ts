@@ -1,9 +1,9 @@
 export interface UserData {
   email: string;
   password: string;
-  username: string;
+  name: string;
   nickname: string;
-  phoneNum: number;
+  phoneNumber: string;
 }
 
 export interface UserRegistData extends UserData {

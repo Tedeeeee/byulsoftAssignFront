@@ -121,7 +121,7 @@ const checkComfirmPassword = [
 
 const checkDuplicate = (endPoint, paramName, paramValue, returnRes: (response) => {}, returnErr: (error) => {}) => {
   return axios
-    .get(`http://localhost:8080/${endPoint}`, {
+    .get(`/api/${endPoint}`, {
       params: {
         [paramName]: paramValue,
       },
@@ -175,7 +175,7 @@ const handleSubmit = async () => {
 
   // 서버에서 이메일과 닉네임을 한 번 더 체크한다.
   axios
-    .post('http://localhost:8080/members/register', userData.value)
+    .post('/api/members/register', userData.value)
     .then(response => {
       // 게시판으로 이동하고 로그인과 회원가입을 닉네임으로 변경
       router.push('/login');

@@ -9,6 +9,7 @@
           Title
         </q-toolbar-title>
         <div class="q-pa-md q-gutter-sm">
+          <q-btn v-if="userStore.isLoggedIn" @click="healthCheck" color="black" label="헬스체크" />
           <q-btn v-if="!userStore.isLoggedIn" to="/login" color="black" label="로그인" />
           <q-btn v-if="!userStore.isLoggedIn" to="/signUp" color="black" label="회원가입" />
           <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
@@ -35,6 +36,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
+import axios from 'axios';
+import { log } from 'console';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -48,6 +51,19 @@ const handleLogout = () => {
   userStore.isLoggedIn = false;
   localStorage.removeItem('user');
   router.push('/');
+};
+
+const healthCheck = () => {
+  axios
+    .get('/api/members/healthCheck', {
+      withCredentials: true,
+    })
+    .then(response => {
+      console.log(response);
+    })
+    .catch(error => {
+      console.log(error);
+    });
 };
 </script>
 

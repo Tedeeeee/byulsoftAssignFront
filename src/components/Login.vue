@@ -1,11 +1,24 @@
 <template>
+  <div>
+    <q-dialog v-model="isDialogOpen">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">아이디 혹은 비밀번호가 틀렸습니다.</div>
+        </q-card-section>
+
+        <q-card-actions align="center">
+          <q-btn flat label="닫기" @click="closeModal" color="primary" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
   <q-page class="login-page">
     <q-card class="login-card" flat bordered>
       <q-card-section class="q-pt-none">
         <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
-          <q-input v-model="email" label="Email" type="email" outlined class="q-mb-md" />
-          <q-input v-model="password" label="Password" type="password" outlined class="q-mb-md" />
+          <q-input v-model="loginData.email" label="Email" type="email" outlined class="q-mb-md" />
+          <q-input v-model="loginData.password" label="Password" type="password" outlined class="q-mb-md" />
           <q-btn label="Login" type="submit" color="primary" class="full-width" />
           <div class="text-center q-mt-md">
             <q-btn flat label="혹시 회원이 아니신가요?" to="/signUp" class="custom-link" />
@@ -17,15 +30,47 @@
 </template>
 
 <script setup lang="ts">
+import type { UserData } from '@/type/user';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/useUserStore';
+import axios from 'axios';
 
-const email = ref('');
-const password = ref('');
+type LoginData = Pick<UserData, 'email' | 'password'>;
+
+const router = useRouter();
+const isDialogOpen = ref(false);
+const userStore = useUserStore();
+
+const showModal = () => {
+  isDialogOpen.value = true;
+};
+const closeModal = () => {
+  isDialogOpen.value = false;
+};
+
+const loginData = ref<LoginData>({
+  email: '',
+  password: '',
+});
 
 const handleSubmit = () => {
-  console.log('Email:', email.value);
-  console.log('Password:', password.value);
-  // 여기에 로그인 로직 추가
+  axios
+    .post('/api/login', {
+      email: loginData.value.email,
+      password: loginData.value.password,
+    })
+    .then(res => {
+      userStore.user = res.data;
+      userStore.isLoggedIn = true;
+      localStorage.setItem('user', res.data);
+      localStorage.setItem('isLoggedIn', true);
+      router.push('/');
+    })
+    .catch(error => {
+      console.log(error.response.data.message);
+      showModal();
+    });
 };
 </script>
 

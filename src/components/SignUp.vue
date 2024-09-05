@@ -35,7 +35,7 @@
             type="password"
             outlined
             lazy-rules
-            :rules="checkPassword"
+            :rules="checkComfirmPassword"
             class="q-mb-md"
           />
           <q-input
@@ -85,6 +85,9 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import type { UserRegistData, UserData } from '@/type/user';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const signUpData = ref<UserRegistData>({
   email: '',
@@ -175,6 +178,7 @@ const handleSubmit = async () => {
     .post('http://localhost:8080/members/register', userData.value)
     .then(response => {
       // 게시판으로 이동하고 로그인과 회원가입을 닉네임으로 변경
+      router.push('/login');
       console.log(response);
     })
     .catch(error => {

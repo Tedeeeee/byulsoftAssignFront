@@ -9,8 +9,11 @@
           Title
         </q-toolbar-title>
         <div class="q-pa-md q-gutter-sm">
-          <q-btn to="/login" color="black" label="로그인" />
-          <q-btn to="/signUp" color="black" label="회원가입" />
+          <q-btn v-if="!userStore.isLoggedIn" to="/login" color="black" label="로그인" />
+          <q-btn v-if="!userStore.isLoggedIn" to="/signUp" color="black" label="회원가입" />
+          <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
+          <q-btn v-if="userStore.isLoggedIn" to="/" color="black" label="글쓰기" />
+          <q-btn v-if="userStore.isLoggedIn" @click="handleLogout" color="black" label="로그아웃" />
         </div>
       </q-toolbar>
     </q-header>
@@ -30,24 +33,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/useUserStore';
 
 const router = useRouter();
-
-const leftDrawerOpen = ref(false);
-
-const toggleLeftDrawer = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-};
+const userStore = useUserStore();
 
 const goHome = () => {
+  router.push('/');
+};
+
+const handleLogout = () => {
+  // 로그아웃 api 제작
+  userStore.isLoggedIn = false;
+  localStorage.removeItem('user');
   router.push('/');
 };
 </script>
 
 <style scoped>
 .cursor-pointer {
+  cursor: pointer;
+}
+
+.custom-link {
+  text-decoration: underline;
+  color: black;
   cursor: pointer;
 }
 </style>

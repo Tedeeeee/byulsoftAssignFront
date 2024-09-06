@@ -9,12 +9,16 @@
           Title
         </q-toolbar-title>
         <div class="q-pa-md q-gutter-sm">
-          <q-btn v-if="userStore.isLoggedIn" @click="healthCheck" color="black" label="헬스체크" />
-          <q-btn v-if="!userStore.isLoggedIn" to="/login" color="black" label="로그인" />
-          <q-btn v-if="!userStore.isLoggedIn" to="/signUp" color="black" label="회원가입" />
-          <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
-          <q-btn v-if="userStore.isLoggedIn" to="/" color="black" label="글쓰기" />
-          <q-btn v-if="userStore.isLoggedIn" @click="handleLogout" color="black" label="로그아웃" />
+          <template v-if="userStore.isLoggedIn">
+            <q-btn v-if="userStore.isLoggedIn" @click="healthCheckBtn" color="black" label="헬스체크" />
+            <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
+            <q-btn v-if="userStore.isLoggedIn" to="/write" color="black" label="글쓰기" />
+            <q-btn v-if="userStore.isLoggedIn" @click="handleLogout" color="black" label="로그아웃" />
+          </template>
+          <template v-else>
+            <q-btn v-if="!userStore.isLoggedIn" to="/login" color="black" label="로그인" />
+            <q-btn v-if="!userStore.isLoggedIn" to="/signUp" color="black" label="회원가입" />
+          </template>
         </div>
       </q-toolbar>
     </q-header>
@@ -36,8 +40,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
+import { healthCheck } from '@/api/index';
 import axios from 'axios';
-import { log } from 'console';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -48,22 +52,14 @@ const goHome = () => {
 
 const handleLogout = () => {
   // 로그아웃 api 제작
-  userStore.isLoggedIn = false;
-  localStorage.removeItem('user');
+  userStore.logout();
   router.push('/');
 };
 
-const healthCheck = () => {
-  axios
-    .get('/api/members/healthCheck', {
-      withCredentials: true,
-    })
-    .then(response => {
-      console.log(response);
-    })
-    .catch(error => {
-      console.log(error);
-    });
+const healthCheckBtn = async () => {
+  const response = await healthCheck();
+
+  console.log(response.data);
 };
 </script>
 

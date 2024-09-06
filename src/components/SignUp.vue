@@ -2,6 +2,7 @@
   <q-page class="sign-up-page">
     <q-card class="sign-up-card" flat bordered>
       <q-card-section>
+        {{ signUpData.emailCheck }}
         <div class="title">회원가입</div>
         <q-form @submit="handleSubmit">
           <div class="input-btn-container">
@@ -86,6 +87,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import type { UserRegistData, UserData } from '@/type/user';
 import { useRouter } from 'vue-router';
+import { register, checkNickname, checkEmail } from '@/api/auth';
 
 const router = useRouter();
 
@@ -119,51 +121,29 @@ const checkComfirmPassword = [
   val => signUpData.value.password === signUpData.value.confirmPassword || '비밀번호가 일치하지 않습니다',
 ];
 
-const checkDuplicate = (endPoint, paramName, paramValue, returnRes: (response) => {}, returnErr: (error) => {}) => {
-  return axios
-    .get(`/api/${endPoint}`, {
-      params: {
-        [paramName]: paramValue,
-      },
-    })
-    .then(returnRes)
-    .catch(returnErr);
+const emailCheckDuplicate = async () => {
+  try {
+    const response = await checkEmail(signUpData.value.email);
+    if (response.data === '사용 가능한 이메일입니다.') {
+      signUpData.value.emailCheck = true;
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-const emailCheckDuplicate = () => {
-  checkDuplicate(
-    'members/checkEmail',
-    'email',
-    signUpData.value.email,
-    response => {
-      if (response.data === '사용 가능한 이메일입니다.') {
-        signUpData.value.emailCheck = true;
-      }
-    },
-    error => {
-      console.log(error);
-    },
-  );
-};
-
-const nicknameCheckDuplicate = () => {
-  checkDuplicate(
-    'members/checkNickName',
-    'nickName',
-    signUpData.value.nickname,
-    response => {
-      if (response.data === '사용 가능한 닉네임입니다.') {
-        signUpData.value.nicknameCheck = true;
-      }
-    },
-    error => {
-      console.log(error);
-    },
-  );
+const nicknameCheckDuplicate = async () => {
+  try {
+    const response = await checkNickname(signUpData.value.nickname);
+    if (response.data === '사용 가능한 닉네임입니다.') {
+      signUpData.value.nicknameCheck = true;
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const handleSubmit = async () => {
-  console.log('Submit 버튼 클릭');
   console.log('회원가입이 진행됩니다.');
   const userData = ref<UserData>({
     email: signUpData.value.email,
@@ -173,27 +153,22 @@ const handleSubmit = async () => {
     phoneNumber: signUpData.value.phoneNum,
   });
 
-  // 서버에서 이메일과 닉네임을 한 번 더 체크한다.
-  axios
-    .post('/api/members/register', userData.value)
-    .then(response => {
-      // 게시판으로 이동하고 로그인과 회원가입을 닉네임으로 변경
-      router.push('/login');
-      console.log(response);
-    })
-    .catch(error => {
-      const errorMessage = error.response.data.message;
-      console.log(error.response.data.message);
-      if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
-        alert('이메일 중복 체크를 다시 진행해주세요');
-        signUpData.value.email = '';
-        signUpData.value.emailCheck = false;
-      } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
-        alert('닉네임 중복 체크를 다시 진행해주세요');
-        signUpData.value.nickname = '';
-        signUpData.value.nicknameCheck = false;
-      }
-    });
+  try {
+    await register(userData.value);
+    router.push('/login');
+  } catch (err) {
+    const errorMessage = err.response.data.message;
+    console.log(err.response.data.message);
+    if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
+      alert('이메일 중복 체크를 다시 진행해주세요');
+      signUpData.value.email = '';
+      signUpData.value.emailCheck = false;
+    } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
+      alert('닉네임 중복 체크를 다시 진행해주세요');
+      signUpData.value.nickname = '';
+      signUpData.value.nicknameCheck = false;
+    }
+  }
 };
 </script>
 

@@ -34,6 +34,7 @@ import type { UserData } from '@/type/user';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
+import { login } from '@/api/auth';
 import axios from 'axios';
 
 type LoginData = Pick<UserData, 'email' | 'password'>;
@@ -54,23 +55,27 @@ const loginData = ref<LoginData>({
   password: '',
 });
 
-const handleSubmit = () => {
-  axios
-    .post('/api/login', {
-      email: loginData.value.email,
-      password: loginData.value.password,
-    })
-    .then(res => {
-      userStore.user = res.data;
-      userStore.isLoggedIn = true;
-      localStorage.setItem('user', res.data);
-      localStorage.setItem('isLoggedIn', true);
-      router.push('/');
-    })
-    .catch(error => {
-      console.log(error.response.data.message);
-      showModal();
-    });
+const handleSubmit = async () => {
+  // axios
+  //   .post('/api/login', {
+  //     email: loginData.value.email,
+  //     password: loginData.value.password,
+  //   })
+  //   .then(res => {
+  //     userStore.login(res.data);
+  //     router.push('/');
+  //   })
+  //   .catch(error => {
+  //     console.log(error.response.data.message);
+  //     showModal();
+  //   });
+
+  const response = await login(loginData.value.email, loginData.value.password);
+
+  if (response.status === 200) {
+    userStore.login(response.data);
+    router.push('/');
+  }
 };
 </script>
 

@@ -1,21 +1,19 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
-  const user = localStorage.getItem('user');
+  const user = ref(localStorage.getItem('user'));
+  const isLoggedIn = computed(() => !!user.value);
 
-  const isLoggedIn = () => {
-    return localStorage.getItem('user');
+  const logout = () => {
+    localStorage.removeItem('user');
+    user.value = '';
   };
 
-  function setLoggedIn(value: boolean) {
-    isLoggedIn.value = value;
-  }
+  const login = nickname => {
+    localStorage.setItem('user', nickname);
+    user.value = nickname;
+  };
 
-  function logout() {
-    setLoggedIn(false);
-    localStorage.removeItem('user');
-  }
-
-  return { isLoggedIn, setLoggedIn, logout, user };
+  return { isLoggedIn, logout, login, user };
 });

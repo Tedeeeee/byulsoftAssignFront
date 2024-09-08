@@ -1,16 +1,15 @@
 <template>
   <q-layout view="hHh lpR fff">
-    <q-header reveal elevated class="bg-primary text-white" height-hint="98">
+    <q-header reveal elevated class="bg-tera text-white" height-hint="98">
       <q-toolbar>
         <q-toolbar-title @click="goHome" class="cursor-pointer">
           <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
+            <img :src="logo" alt="Logo" />
           </q-avatar>
-          Title
+          요방어때
         </q-toolbar-title>
         <div class="q-pa-md q-gutter-sm">
           <template v-if="userStore.isLoggedIn">
-            <q-btn v-if="userStore.isLoggedIn" @click="healthCheckBtn" color="black" label="헬스체크" />
             <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
             <q-btn v-if="userStore.isLoggedIn" to="/write" color="black" label="글쓰기" />
             <q-btn v-if="userStore.isLoggedIn" @click="handleLogout" color="black" label="로그아웃" />
@@ -42,6 +41,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import { healthCheck } from '@/api/index';
 import axios from 'axios';
+import logo from './assets/로고.png';
 
 const router = useRouter();
 const userStore = useUserStore();

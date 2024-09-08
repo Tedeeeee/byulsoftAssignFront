@@ -85,7 +85,7 @@ const submitForm = () => {};
 
 .custom-select,
 .custom-input {
-  height: 56px; /* q-input과 q-select의 기본 높이 */
+  height: 56px;
   line-height: 1.5;
 }
 </style>

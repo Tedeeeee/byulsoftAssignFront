@@ -84,8 +84,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import axios from 'axios';
-import type { UserRegistData, UserData } from '@/type/user';
+import type { UserRegistData, UserData } from '@/type/User';
 import { useRouter } from 'vue-router';
 import { register, checkNickname, checkEmail } from '@/api/auth';
 

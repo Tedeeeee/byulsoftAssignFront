@@ -3,6 +3,8 @@
     <div class="q-gutter-md">
       <!-- 게시글 카드 -->
       <div class="post-card">
+        {{ review }}
+        {{ boardId }}
         <q-card flat bordered class="q-pa-md">
           <div class="row">
             <div class="left-section q-mr-md">
@@ -11,33 +13,28 @@
             <q-separator vertical />
             <div class="right-section">
               <div class="info-section q-mb-md">
-                <h4>[서울] 게시글 제목 1</h4>
+                <h4>[{{ review.region }}] {{ review.title }}</h4>
               </div>
               <q-separator />
               <div class="row q-col-gutter-ms q-mt-md">
                 <div class="col">
-                  <span>길</span><br />
-                  <span class="col-1">꽃길</span>
-                </div>
-                <q-separator vertical />
-                <div class="col">
                   <span>작성자</span><br />
-                  <span class="col-2">작성자 1</span>
+                  <span class="col-2">{{ nickname }}</span>
                 </div>
                 <q-separator vertical />
                 <div class="col">
                   <span>작성시간</span><br />
-                  <span class="col-3">2024-09-01</span>
+                  <span class="col-3">{{ review.createDate }}</span>
                 </div>
                 <q-separator vertical />
                 <div class="col">
                   <span>조회수</span><br />
-                  <span class="col-2">100</span>
+                  <span class="col-2">{{ review.view }}</span>
                 </div>
                 <q-separator vertical />
                 <div class="col">
                   <span>좋아요</span><br />
-                  <span class="col-2">10</span>
+                  <span class="col-2">{{ review.likes }}</span>
                 </div>
               </div>
             </div>
@@ -45,20 +42,100 @@
         </q-card>
       </div>
 
-      <div v-for="(item, index) in reviewItems" :key="index" class="post-card">
+      <div class="post-card">
         <q-card flat bordered class="q-pa-sm">
           <div class="row">
             <div class="left-section q-mr-sm">
-              <q-img :src="item.image" alt="사진" style="width: 70px; height: 70px" />
+              <q-img :src="difficultyImage" alt="사진" style="width: 70px; height: 70px" />
             </div>
             <div class="right-section">
               <div class="row q-mt-sm">
                 <div class="col">
-                  <q-rating v-model="item.rating" max="5" readonly />
+                  <q-rating v-model="review.difficultyRating" max="5" readonly />
                 </div>
               </div>
               <div class="info-section q-mb-sm">
-                <h6>{{ item.contents }}</h6>
+                <h6>{{ review.difficulty }}</h6>
+              </div>
+            </div>
+          </div>
+        </q-card>
+        <q-separator />
+      </div>
+      <div class="post-card">
+        <q-card flat bordered class="q-pa-sm">
+          <div class="row">
+            <div class="left-section q-mr-sm">
+              <q-img :src="storyImage" alt="사진" style="width: 70px; height: 70px" />
+            </div>
+            <div class="right-section">
+              <div class="row q-mt-sm">
+                <div class="col">
+                  <q-rating v-model="review.storyRating" max="5" readonly />
+                </div>
+              </div>
+              <div class="info-section q-mb-sm">
+                <h6>{{ review.story }}</h6>
+              </div>
+            </div>
+          </div>
+        </q-card>
+        <q-separator />
+      </div>
+      <div class="post-card">
+        <q-card flat bordered class="q-pa-sm">
+          <div class="row">
+            <div class="left-section q-mr-sm">
+              <q-img :src="interiorImage" alt="사진" style="width: 70px; height: 70px" />
+            </div>
+            <div class="right-section">
+              <div class="row q-mt-sm">
+                <div class="col">
+                  <q-rating v-model="review.interiorRating" max="5" readonly />
+                </div>
+              </div>
+              <div class="info-section q-mb-sm">
+                <h6>{{ review.interior }}</h6>
+              </div>
+            </div>
+          </div>
+        </q-card>
+        <q-separator />
+      </div>
+      <div class="post-card">
+        <q-card flat bordered class="q-pa-sm">
+          <div class="row">
+            <div class="left-section q-mr-sm">
+              <q-img :src="activityImage" alt="사진" style="width: 70px; height: 70px" />
+            </div>
+            <div class="right-section">
+              <div class="row q-mt-sm">
+                <div class="col">
+                  <q-rating v-model="review.activityRating" max="5" readonly />
+                </div>
+              </div>
+              <div class="info-section q-mb-sm">
+                <h6>{{ review.activity }}</h6>
+              </div>
+            </div>
+          </div>
+        </q-card>
+        <q-separator />
+      </div>
+      <div class="post-card">
+        <q-card flat bordered class="q-pa-sm">
+          <div class="row">
+            <div class="left-section q-mr-sm">
+              <q-img :src="horrorImage" alt="사진" style="width: 70px; height: 70px" />
+            </div>
+            <div class="right-section">
+              <div class="row q-mt-sm">
+                <div class="col">
+                  <q-rating v-model="review.horrorRating" max="5" readonly />
+                </div>
+              </div>
+              <div class="info-section q-mb-sm">
+                <h6>{{ review.horror }}</h6>
               </div>
             </div>
           </div>
@@ -68,12 +145,13 @@
 
       <div class="review-summary q-mt-lg">
         <q-card flat class="q-pa-md review-summary-card">
-          <q-img :src="review" alt="사진" style="width: 170px; height: 170px" />
-          <h4 class="text-center">총평</h4>
-          <p class="text-center">이 페이지에 대한 종합적인 평가와 의견을 여기에 적어주세요.</p>
+          <q-img :src="totalReview" alt="사진" style="width: 170px; height: 170px" />
+          <p class="text-center">{{ review.content }}</p>
         </q-card>
+        <q-separator />
       </div>
 
+      <!--댓글-->
       <div class="comment-section q-mt-lg">
         <h5>댓글</h5>
 
@@ -96,7 +174,7 @@
             <div v-if="comment.showReplyForm" class="q-mt-md">
               <q-card flat bordered class="q-pa-md">
                 <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
-                <q-btn label="Submit" @click="addReply(index)" color="primary" />
+                <q-btn label="답변하기" @click="addReply(index)" color="primary" />
               </q-card>
             </div>
 
@@ -113,7 +191,7 @@
           </q-card>
         </div>
         <q-card flat bordered class="q-pa-md">
-          <q-input filled v-model="newComment" label="댓글을 작성해주세요" type="textarea" rows="3" class="q-mb-md" />
+          <q-input filled v-model="content.text" label="댓글을 작성해주세요" type="textarea" rows="3" class="q-mb-md" />
           <q-btn label="댓글 작성하기" @click="addComment" color="primary" />
         </q-card>
       </div>
@@ -121,51 +199,58 @@
   </q-page>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import pathToImage from '@/assets/웃는 사진.jpeg';
-import hard from '@/assets/난이도.png';
-import story from '@/assets/스토리.png';
-import interia from '@/assets/인테리어.png';
-import movement from '@/assets/활동성.png';
-import scared from '@/assets/공포도.png';
-import review from '@/assets/총평.png';
+import totalReview from '@/assets/총평.png';
+import horrorImage from '@/assets/공포도.png';
+import difficultyImage from '@/assets/난이도.png';
+import storyImage from '@/assets/스토리.png';
+import interiorImage from '@/assets/인테리어.png';
+import activityImage from '@/assets/활동성.png';
+import { getBoardById } from '@/api/auth.ts';
+import { ContentDetail } from '@/type/Contents.ts';
+import { Comment, type Reply } from '@/type/Comment.ts';
+import { insertComment } from '@/api';
 
 const imageSource = ref(pathToImage);
-const router = useRouter();
+const props = defineProps<{
+  id: string;
+}>();
 
-const reviewItems = ref([
-  { image: hard, contents: '어렵지 않았슴', rating: 4 },
-  { image: story, contents: '감동 실화', rating: 5 },
-  { image: interia, contents: '페인트 벗겨진데 있었음', rating: 3 },
-  { image: scared, contents: '진짜 무섭더라...', rating: 2 },
-  { image: movement, contents: '운동화 필수', rating: 5 },
-]);
+const boardId = props.id;
 
-const newComment = ref('');
+const review = ref<ContentDetail>({
+  title: '',
+  content: '',
+  region: '',
+  difficulty: '',
+  difficultyRating: 0,
+  horror: '',
+  horrorRating: 0,
+  story: '',
+  storyRating: 0,
+  activity: '',
+  activityRating: 0,
+  interior: '',
+  interiorRating: 0,
+  view: 0,
+  likes: 0,
+  createDate: '',
+});
+
+const comments = ref<Comment[]>([]);
+
+const content = ref({
+  text: '',
+});
 const nickname = localStorage.getItem('user');
 const currentUser = ref(nickname);
 
-const comments = ref([
-  { username: 'User1', date: '2024-09-08', text: '잘봤습니다!!', replies: [], newReply: '', showReplyForm: false },
-  { username: 'User2', date: '2024-09-08', text: '저 이거 12분 남김', replies: [], newReply: '', showReplyForm: false },
-  { username: '닉네임이다', date: '2024-09-08', text: '이거 많이 어려운가요?', replies: [], newReply: '', showReplyForm: false },
-  { username: '어쩌구저쩌구', date: '2024-09-08', text: '나는 이거 못깼는데...', replies: [], newReply: '', showReplyForm: false },
-]);
-
-const addComment = () => {
-  if (newComment.value.trim()) {
-    comments.value.push({
-      username: 'New User',
-      date: new Date().toLocaleDateString(),
-      text: newComment.value.trim(),
-      replies: [],
-      newReply: '',
-      showReplyForm: false,
-    });
-    newComment.value = '';
-  }
+const addComment = async () => {
+  console.log(content);
+  const response = await insertComment(boardId, content);
+  console.log(response.data);
 };
 
 const toggleReply = index => {
@@ -184,6 +269,15 @@ const addReply = commentIndex => {
     comment.showReplyForm = false;
   }
 };
+
+const fetchContentDetails = async () => {
+  const response = await getBoardById(boardId);
+  review.value = response.data;
+};
+
+onMounted(() => {
+  fetchContentDetails();
+});
 </script>
 
 <style scoped>

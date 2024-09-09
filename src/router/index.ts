@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/components/Login.vue';
 import SignUp from '@/components/SignUp.vue';
-import Board from '@/components/board.vue';
-import WriteContents from '@/components/writeContents.vue';
+import Board from '@/components/Board.vue';
+import WriteContents from '@/components/WriteContents.vue';
 import PostDetail from '@/components/PostDetail.vue';
 
 const router = createRouter({

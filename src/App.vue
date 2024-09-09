@@ -40,13 +40,12 @@
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import { healthCheck } from '@/api/index';
-import axios from 'axios';
 import logo from './assets/로고.png';
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const goHome = () => {
+const goHome = async () => {
   router.push('/');
 };
 

@@ -1,10 +1,20 @@
 <template>
+  <div>
+    <q-dialog v-model="isDialogOpen">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">{{ modalMessage }}</div>
+        </q-card-section>
+        <q-card-actions align="center">
+          <q-btn flat label="수정하기" @click="closeModal" :to="`/updateWrite/${boardId}`" color="primary" />
+          <q-btn flat label="닫기" @click="closeModal" color="primary" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
   <q-page padding>
-    <div class="q-gutter-md">
-      <!-- 게시글 카드 -->
+    <div class="q-gutter-md" v-if="review">
       <div class="post-card">
-        {{ review }}
-        {{ boardId }}
         <q-card flat bordered class="q-pa-md">
           <div class="row">
             <div class="left-section q-mr-md">
@@ -19,12 +29,12 @@
               <div class="row q-col-gutter-ms q-mt-md">
                 <div class="col">
                   <span>작성자</span><br />
-                  <span class="col-2">{{ nickname }}</span>
+                  <span class="col-2">{{ review.nickname }}</span>
                 </div>
                 <q-separator vertical />
                 <div class="col">
                   <span>작성시간</span><br />
-                  <span class="col-3">{{ review.createDate }}</span>
+                  <span class="col-3">{{ review.createdAt }}</span>
                 </div>
                 <q-separator vertical />
                 <div class="col">
@@ -42,159 +52,41 @@
         </q-card>
       </div>
 
-      <div class="post-card">
+      <div v-if="review.nickname === nickname" class="button-container q-mt-md">
+        <q-btn label="수정" @click="showModal('수정하시겠습니까?')" color="primary" class="q-mr-xs" />
+        <q-btn label="삭제" @click="showModal('삭제하시겠습니까?')" color="negative" class="q-mr-xs" />
+      </div>
+      <div v-for="(star, idx) in review.boardStars" :key="idx" class="post-card">
         <q-card flat bordered class="q-pa-sm">
           <div class="row">
             <div class="left-section q-mr-sm">
-              <q-img :src="difficultyImage" alt="사진" style="width: 70px; height: 70px" />
+              <q-img :src="images[idx]" alt="사진" style="width: 70px; height: 70px" />
             </div>
             <div class="right-section">
               <div class="row q-mt-sm">
                 <div class="col">
-                  <q-rating v-model="review.difficultyRating" max="5" readonly />
+                  <q-rating v-model="star.starRating" max="5" readonly />
                 </div>
               </div>
               <div class="info-section q-mb-sm">
-                <h6>{{ review.difficulty }}</h6>
+                <h6>{{ star.starShortReview }}</h6>
               </div>
             </div>
           </div>
         </q-card>
         <q-separator />
       </div>
-      <div class="post-card">
-        <q-card flat bordered class="q-pa-sm">
-          <div class="row">
-            <div class="left-section q-mr-sm">
-              <q-img :src="storyImage" alt="사진" style="width: 70px; height: 70px" />
-            </div>
-            <div class="right-section">
-              <div class="row q-mt-sm">
-                <div class="col">
-                  <q-rating v-model="review.storyRating" max="5" readonly />
-                </div>
-              </div>
-              <div class="info-section q-mb-sm">
-                <h6>{{ review.story }}</h6>
-              </div>
-            </div>
-          </div>
-        </q-card>
-        <q-separator />
-      </div>
-      <div class="post-card">
-        <q-card flat bordered class="q-pa-sm">
-          <div class="row">
-            <div class="left-section q-mr-sm">
-              <q-img :src="interiorImage" alt="사진" style="width: 70px; height: 70px" />
-            </div>
-            <div class="right-section">
-              <div class="row q-mt-sm">
-                <div class="col">
-                  <q-rating v-model="review.interiorRating" max="5" readonly />
-                </div>
-              </div>
-              <div class="info-section q-mb-sm">
-                <h6>{{ review.interior }}</h6>
-              </div>
-            </div>
-          </div>
-        </q-card>
-        <q-separator />
-      </div>
-      <div class="post-card">
-        <q-card flat bordered class="q-pa-sm">
-          <div class="row">
-            <div class="left-section q-mr-sm">
-              <q-img :src="activityImage" alt="사진" style="width: 70px; height: 70px" />
-            </div>
-            <div class="right-section">
-              <div class="row q-mt-sm">
-                <div class="col">
-                  <q-rating v-model="review.activityRating" max="5" readonly />
-                </div>
-              </div>
-              <div class="info-section q-mb-sm">
-                <h6>{{ review.activity }}</h6>
-              </div>
-            </div>
-          </div>
-        </q-card>
-        <q-separator />
-      </div>
-      <div class="post-card">
-        <q-card flat bordered class="q-pa-sm">
-          <div class="row">
-            <div class="left-section q-mr-sm">
-              <q-img :src="horrorImage" alt="사진" style="width: 70px; height: 70px" />
-            </div>
-            <div class="right-section">
-              <div class="row q-mt-sm">
-                <div class="col">
-                  <q-rating v-model="review.horrorRating" max="5" readonly />
-                </div>
-              </div>
-              <div class="info-section q-mb-sm">
-                <h6>{{ review.horror }}</h6>
-              </div>
-            </div>
-          </div>
-        </q-card>
-        <q-separator />
-      </div>
-
       <div class="review-summary q-mt-lg">
         <q-card flat class="q-pa-md review-summary-card">
           <q-img :src="totalReview" alt="사진" style="width: 170px; height: 170px" />
-          <p class="text-center">{{ review.content }}</p>
+          <p class="text-center">
+            {{ review.contents }}
+          </p>
         </q-card>
         <q-separator />
       </div>
 
-      <!--댓글-->
-      <div class="comment-section q-mt-lg">
-        <h5>댓글</h5>
-
-        <div v-if="comments.length" class="q-mt-md">
-          <q-card flat bordered class="q-pa-md comment-card" v-for="(comment, index) in comments" :key="index">
-            <div class="comment-header row items-center q-mb-md">
-              <strong class="col">{{ comment.username }}</strong>
-              <span>{{ comment.date }}</span>
-              <div v-if="comment.username === currentUser" class="comment-actions col-auto">
-                <q-btn flat label="수정" @click="editComment(index)" color="primary" class="q-mr-xs" />
-                <q-btn flat label="삭제" @click="deleteComment(index)" color="negative" class="q-mr-xs" />
-              </div>
-              <div v-if="comment.username !== currentUser" class="col-auto">
-                <q-btn flat label="답변" @click="toggleReply(index)" color="secondary" />
-              </div>
-            </div>
-            <q-separator />
-            <p>{{ comment.text }}</p>
-
-            <div v-if="comment.showReplyForm" class="q-mt-md">
-              <q-card flat bordered class="q-pa-md">
-                <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
-                <q-btn label="답변하기" @click="addReply(index)" color="primary" />
-              </q-card>
-            </div>
-
-            <div v-if="comment.replies.length" class="q-mt-md">
-              <q-card flat bordered class="q-pa-md" v-for="(reply, rIndex) in comment.replies" :key="rIndex">
-                <div class="comment-header row items-center q-mb-md">
-                  <strong class="col">{{ reply.username }}</strong>
-                  <span>{{ reply.date }}</span>
-                </div>
-                <q-separator />
-                <p>{{ reply.text }}</p>
-              </q-card>
-            </div>
-          </q-card>
-        </div>
-        <q-card flat bordered class="q-pa-md">
-          <q-input filled v-model="content.text" label="댓글을 작성해주세요" type="textarea" rows="3" class="q-mb-md" />
-          <q-btn label="댓글 작성하기" @click="addComment" color="primary" />
-        </q-card>
-      </div>
+      <comment-form :comments="comments" @delete-comment="deleteComment" @add-comment="addComment" @edit-comment="editComment" />
     </div>
   </q-page>
 </template>
@@ -208,71 +100,111 @@ import difficultyImage from '@/assets/난이도.png';
 import storyImage from '@/assets/스토리.png';
 import interiorImage from '@/assets/인테리어.png';
 import activityImage from '@/assets/활동성.png';
-import { getBoardById } from '@/api/auth.ts';
-import { ContentDetail } from '@/type/Contents.ts';
-import { Comment, type Reply } from '@/type/Comment.ts';
-import { insertComment } from '@/api';
+import { findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
+import { Comment } from '@/type/Comment.ts';
+import { BoardStar, Post } from '@/type/BoardStarType';
+import CommentForm from '@/components/CommentForm.vue';
+import { deleteBoard, deleteContents, editCommentText, insertComment } from '@/api';
+import { useUserStore } from '@/stores/useUserStore';
 
+const images = [difficultyImage, storyImage, interiorImage, activityImage, horrorImage];
 const imageSource = ref(pathToImage);
+const nickname = useUserStore().userNickname;
 const props = defineProps<{
   id: string;
 }>();
-
 const boardId = props.id;
-
-const review = ref<ContentDetail>({
-  title: '',
-  content: '',
-  region: '',
-  difficulty: '',
-  difficultyRating: 0,
-  horror: '',
-  horrorRating: 0,
-  story: '',
-  storyRating: 0,
-  activity: '',
-  activityRating: 0,
-  interior: '',
-  interiorRating: 0,
-  view: 0,
-  likes: 0,
-  createDate: '',
-});
-
+const boardStars = ref<BoardStar[]>([]);
 const comments = ref<Comment[]>([]);
+const review = ref<Post | undefined>();
+const isDialogOpen = ref(false);
+const modalMessage = ref('');
 
-const content = ref({
-  text: '',
-});
-const nickname = localStorage.getItem('user');
-const currentUser = ref(nickname);
-
-const addComment = async () => {
-  console.log(content);
-  const response = await insertComment(boardId, content);
-  console.log(response.data);
+const transformToReview = (serverData): Post => {
+  return {
+    id: serverData.id,
+    title: serverData.title,
+    contents: serverData.contents,
+    region: serverData.region,
+    nickname: serverData.nickname,
+    createdAt: serverData.createdAt,
+    view: serverData.view,
+    likes: serverData.likes,
+    boardStars: serverData.boardStars,
+  };
 };
 
-const toggleReply = index => {
-  comments.value[index].showReplyForm = !comments.value[index].showReplyForm;
-};
-
-const addReply = commentIndex => {
-  const comment = comments.value[commentIndex];
-  if (comment.newReply.trim()) {
-    comment.replies.push({
-      username: 'New User',
-      date: new Date().toLocaleDateString(),
-      text: comment.newReply.trim(),
-    });
-    comment.newReply = '';
-    comment.showReplyForm = false;
-  }
+const transformToComment = (serverData): Comment => {
+  return {
+    id: serverData.id,
+    memberId: serverData.memberId,
+    username: serverData.nickname,
+    date: serverData.updatedAt,
+    text: serverData.content,
+    replies: [],
+    newReply: '',
+    showReplyForm: false,
+    isEdit: false,
+  };
 };
 
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  review.value = response.data;
+  console.log(response.data);
+  review.value = transformToReview(response.data);
+  comments.value = response.data.comments.map(transformToComment);
+};
+
+/* 게시글 삭제 여부 확인 모달*/
+const showModal = (message: string) => {
+  modalMessage.value = message;
+  isDialogOpen.value = true;
+};
+const closeModal = () => {
+  isDialogOpen.value = false;
+};
+
+/* 게시글 삭제 */
+const deletePost = async () => {
+  console.log('게시글 삭제');
+  const response = await deleteBoard(boardId);
+  console.log(response);
+};
+
+/* 댓글 추가 */
+const addComment = async content => {
+  console.log('댓글 추가');
+  const data = {
+    content: content,
+    boardId: boardId,
+  };
+
+  const response = await insertComment(data);
+  comments.value = response.data.map(transformToComment);
+};
+
+/*댓글 수정*/
+const editComment = async (text, id) => {
+  console.log('댓글 수정');
+  console.log(text);
+  console.log(id);
+  const data = {
+    content: text,
+    id: id,
+    boardId: boardId,
+  };
+
+  const response = await editCommentText(data);
+  comments.value = response.data.map(transformToComment);
+};
+
+/* 댓글 삭제 */
+const deleteComment = async id => {
+  console.log('댓글 삭제');
+  await deleteContents(id);
+  /*삭제 후 해당 보드의 댓글 다시 로드*/
+  const response = await findCommentsByBoardId(boardId);
+  comments.value = response.data.map(transformToComment);
 };
 
 onMounted(() => {
@@ -332,40 +264,12 @@ onMounted(() => {
   margin-right: 0.25rem;
 }
 
-.q-col-gutter-sm {
-  gap: 0.5rem;
-}
-
-.q-col-gutter-md {
-  gap: 1rem;
-}
-
 .q-mb-md {
   margin-bottom: 1rem;
 }
 
 .q-mb-sm {
   margin-bottom: 0.5rem;
-}
-
-.q-rating {
-  font-size: 24px;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.comment-card {
-  margin-top: 16px;
-  margin-bottom: 16px;
 }
 
 .q-mt-lg {
@@ -383,5 +287,11 @@ onMounted(() => {
 .review-summary-card {
   margin-top: 16px;
   margin-bottom: 16px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 </style>

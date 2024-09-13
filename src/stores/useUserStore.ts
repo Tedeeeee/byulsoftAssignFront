@@ -2,18 +2,18 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref(localStorage.getItem('user'));
-  const isLoggedIn = computed(() => !!user.value);
+  const userNickname = ref(localStorage.getItem('user'));
+  const isLoggedIn = computed(() => !!userNickname.value);
 
   const logout = () => {
     localStorage.removeItem('user');
-    user.value = '';
+    userNickname.value = '';
   };
 
   const login = nickname => {
     localStorage.setItem('user', nickname);
-    user.value = nickname;
+    userNickname.value = nickname;
   };
 
-  return { isLoggedIn, logout, login, user };
+  return { isLoggedIn, logout, login, userNickname };
 });

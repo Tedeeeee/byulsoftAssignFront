@@ -8,15 +8,17 @@
           </q-avatar>
           요방어때
         </q-toolbar-title>
+
         <div class="q-pa-md q-gutter-sm">
+          <q-btn to="/" color="black" label="목록" />
           <template v-if="userStore.isLoggedIn">
-            <q-btn v-if="userStore.isLoggedIn" flat :label="userStore.user" class="custom-link" />
-            <q-btn v-if="userStore.isLoggedIn" to="/write" color="black" label="글쓰기" />
-            <q-btn v-if="userStore.isLoggedIn" @click="handleLogout" color="black" label="로그아웃" />
+            <q-btn flat :label="userStore.userNickname" class="custom-link" />
+            <q-btn to="/insertWrite" color="black" label="글쓰기" />
+            <q-btn @click="handleLogout" color="black" label="로그아웃" />
           </template>
           <template v-else>
-            <q-btn v-if="!userStore.isLoggedIn" to="/login" color="black" label="로그인" />
-            <q-btn v-if="!userStore.isLoggedIn" to="/signUp" color="black" label="회원가입" />
+            <q-btn to="/login" color="black" label="로그인" />
+            <q-btn to="/signUp" color="black" label="회원가입" />
           </template>
         </div>
       </q-toolbar>
@@ -39,27 +41,29 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
-import { healthCheck } from '@/api/index';
 import logo from './assets/로고.png';
+import { deleteRefreshToken } from '@/api';
+import { computed, ref } from 'vue';
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const goHome = async () => {
+const goHome = () => {
   router.push('/');
 };
 
-const handleLogout = () => {
+const showSearch = computed(() => {
+  return router.path('/');
+});
+
+const handleLogout = async () => {
   // 로그아웃 api 제작
   userStore.logout();
+  await deleteRefreshToken();
   router.push('/');
 };
 
-const healthCheckBtn = async () => {
-  const response = await healthCheck();
-
-  console.log(response.data);
-};
+const searchQuery = ref('');
 </script>
 
 <style scoped>

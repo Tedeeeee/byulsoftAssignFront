@@ -15,6 +15,7 @@
   <q-page class="login-page">
     <q-card class="login-card" flat bordered>
       <q-card-section class="q-pt-none">
+        {{ loginData }}
         <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
           <q-input v-model="loginData.email" label="Email" type="email" outlined class="q-mb-md" />
@@ -50,8 +51,8 @@ const closeModal = () => {
 };
 
 const loginData = ref<LoginData>({
-  email: '',
-  password: '',
+  memberEmail: '',
+  memberPassword: '',
 });
 
 const handleSubmit = async () => {
@@ -60,10 +61,9 @@ const handleSubmit = async () => {
     if (response.status === 200) {
       console.log(response);
       userStore.login(response.data);
-      router.push('/');
+      await router.push('/');
     }
   } catch (error) {
-    // 오류가 발생한 경우 모달을 띄운다
     console.log(error);
     showModal();
   }

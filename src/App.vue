@@ -45,6 +45,7 @@ import logo from './assets/로고.png';
 import { deleteRefreshToken } from '@/api';
 import { computed, ref } from 'vue';
 
+const searchQuery = ref('');
 const router = useRouter();
 const userStore = useUserStore();
 
@@ -59,11 +60,10 @@ const showSearch = computed(() => {
 const handleLogout = async () => {
   // 로그아웃 api 제작
   userStore.logout();
-  await deleteRefreshToken();
+  await logout();
   router.push('/');
 };
 
-const searchQuery = ref('');
 </script>
 
 <style scoped>

@@ -3,7 +3,9 @@ import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
   const userNickname = ref(localStorage.getItem('user'));
-  const isLoggedIn = computed(() => !!userNickname.value);
+  const isLoggedIn = computed(
+    () => !!userNickname.value
+  );
 
   const logout = () => {
     localStorage.removeItem('user');

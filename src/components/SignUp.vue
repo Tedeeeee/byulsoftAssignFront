@@ -9,10 +9,11 @@
               ref="emailInput"
               filled
               maxlength="320"
-              v-model="signUpData.email"
+              v-model="signUpData.memberEmail"
               label="이메일"
               type="email"
               outlined
+              lazy-rules
               :rules="emailRules"
               class="input-field"
             />
@@ -20,7 +21,7 @@
           </div>
           <q-input
             filled
-            v-model="signUpData.password"
+            v-model="signUpData.memberPassword"
             label="비밀번호"
             type="password"
             outlined
@@ -38,13 +39,13 @@
             :rules="checkConfirmPassword"
             class="q-mb-md"
           />
-          <q-input filled maxlength="18" v-model="signUpData.username" label="이름" lazy-rules :rules="nameRules" class="q-mb-md" />
+          <q-input filled maxlength="18" v-model="signUpData.memberName" label="이름" lazy-rules :rules="nameRules" class="q-mb-md" />
           <div class="input-btn-container">
             <q-input
               ref="nicknameInput"
               filled
               maxlength="10"
-              v-model="signUpData.nickname"
+              v-model="signUpData.memberNickname"
               label="닉네임"
               outlined
               lazy-rules
@@ -56,7 +57,7 @@
           <q-input
             filled
             maxlength="11"
-            v-model="signUpData.phoneNum"
+            v-model="signUpData.memberPhoneNumber"
             label="'-' 을 제외한 번호를 입력해주세요"
             type="tel"
             outlined
@@ -83,22 +84,22 @@ const emailInput = ref(null);
 const nicknameInput = ref(null);
 
 const signUpData = ref<UserRegistData>({
-  email: '',
+  memberEmail: '',
   emailCheck: false,
-  password: '',
+  memberPassword: '',
   confirmPassword: '',
-  username: '',
-  nickname: '',
+  memberName: '',
+  memberNickname: '',
   nicknameCheck: false,
-  phoneNum: '',
+  memberPhoneNum: '',
 });
 
-const emailRules = computed(() => [
-  val => (signUpData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
+const emailRules = [
   val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || '올바른 이메일을 입력해주세요',
-]);
+  val => (signUpData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
+];
 const nicknameRules = [
-  val => (val && val.length > 0) || '닉네임을 입력해주세요',
+  val => (val && val.length > 3) || '3글자 이상의 닉네임을 입력해주세요',
   val => (signUpData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
 const nameRules = [
@@ -114,21 +115,44 @@ const checkPassword = [
 
 const checkConfirmPassword = [
   val => (val && val.length > 0) || '비밀번호를 입력해주세요',
-  val => signUpData.value.password === signUpData.value.confirmPassword || '비밀번호가 일치하지 않습니다',
+  val => signUpData.value.memberPassword === val || '비밀번호가 일치하지 않습니다',
 ];
 
 const phoneNumberRules = [
   val => (val && val.length > 0) || '전화번호를 입력해주세요',
   val => /^[0-9]{10,11}$/.test(val) || "' - ' 을 제외한 번호를 입력해주세요",
 ];
+const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signUpData.value.memberEmail));
+
+const isNicknameValid = computed(() => signUpData.value.memberNickname.length > 3);
 
 const emailCheckDuplicate = async () => {
+  if (!isEmailValid.value) {
+    $q.notify({
+      type: 'negative',
+      message: '올바른 이메일 형식을 작성해주세요',
+      position: 'top',
+    });
+    return;
+  }
+
   try {
-    const response = await checkEmail(signUpData.value.email);
+    const response = await checkEmail(signUpData.value.memberEmail);
     if (response.data === '사용 가능한 이메일입니다.') {
       signUpData.value.emailCheck = true;
-      await nextTick();
-      emailInput.value?.focus();
+      $q.notify({
+        type: 'positive',
+        message: '사용 가능한 이메일입니다.',
+        position: 'top',
+      });
+      emailInput.value.resetValidation();
+    } else {
+      signUpData.value.emailCheck = false;
+      $q.notify({
+        type: 'negative',
+        message: '이메일 중복 체크에 실패했습니다.',
+        position: 'top',
+      });
     }
   } catch (error) {
     console.log(error);
@@ -139,48 +163,63 @@ const emailCheckDuplicate = async () => {
     });
     signUpData.value.emailCheck = false;
     await nextTick();
-    emailInput.value?.focus();
+    emailInput.value.focus();
   }
 };
 
 const nicknameCheckDuplicate = async () => {
-  await nextTick();
-  nicknameInput.value.focus();
-  try {
-    const response = await checkNickname(signUpData.value.nickname);
-    console.log(response);
-    if (response.data === '사용 가능한 닉네임입니다.') {
-      signUpData.value.nicknameCheck = true;
-      await nextTick();
-      nicknameInput.value?.focus();
-    }
-  } catch (error) {
-    console.log(error);
+  if (!isNicknameValid.value) {
     $q.notify({
       type: 'negative',
-      message: '닉네임 중복 체크를 다시 진행해주세요',
+      message: '3글자 이상의 닉네임을 입력해주세요',
+      position: 'top',
+    });
+    return;
+  }
+  try {
+    const response = await checkNickname(signUpData.value.memberNickname);
+    if (response.data === '사용 가능한 닉네임입니다.') {
+      signUpData.value.nicknameCheck = true;
+      $q.notify({
+        type: 'positive',
+        message: '사용 가능한 닉네임입니다.',
+        position: 'top',
+      });
+      nicknameInput.value.resetValidation();
+    } else {
+      signUpData.value.nicknameCheck = false;
+      $q.notify({
+        type: 'negative',
+        message: '닉네임 중복 체크에 실패했습니다.',
+        position: 'top',
+      });
+    }
+  } catch (e) {
+    console.log(e);
+    $q.notify({
+      type: 'negative',
+      message: '해당 닉네임은 사용할 수 없습니다',
       position: 'top',
     });
     signUpData.value.nicknameCheck = false;
     await nextTick();
-    nicknameInput.value?.focus();
+    nicknameInput.value.focus();
   }
 };
 
 const handleSubmit = async () => {
   console.log('회원가입이 진행됩니다.');
-  const userData = ref<UserData>({
-    email: signUpData.value.email,
+/*  const userData = ref<UserData>({
+    email: signUpData.value.member,
     password: signUpData.value.password,
     name: signUpData.value.username,
     nickname: signUpData.value.nickname,
     phoneNumber: signUpData.value.phoneNum,
-  });
-
+  });*/
   try {
-    const response = await register(userData.value);
+    const response = await register(signUpData.value);
     console.log(response);
-    router.push('/login');
+    await router.push('/login');
   } catch (err) {
     const errorMessage = err.response.data.message;
     console.log(err.response.data.message);

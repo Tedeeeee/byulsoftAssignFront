@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import WriteContents from '@/components/WriteContents.vue';
+import WriteContents from '@/components/content/WriteContents.vue';
 import { ref } from 'vue';
 import { insertContents } from '@/api';
 import { useRouter } from 'vue-router';

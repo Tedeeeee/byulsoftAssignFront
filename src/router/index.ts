@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/components/Login.vue';
 import SignUp from '@/components/SignUp.vue';
-import Board from '@/components/board.vue';
+import Board from '@/components/Board.vue';
+import InsertWriteComponent from '@/components/InsertWriteComponent.vue';
+import UpdateWriteComponent from '@/components/UpdateWriteComponent.vue';
+import PostDetail from '@/components/PostDetail.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,9 +20,26 @@ const router = createRouter({
       component: SignUp,
     },
     {
-      path: '/Board',
+      path: '/',
       name: 'Board',
       component: Board,
+    },
+    {
+      path: '/insertWrite',
+      name: 'InsertWriteComponent',
+      component: InsertWriteComponent,
+    },
+    {
+      path: '/updateWrite/:id',
+      name: 'UpdateWriteComponent',
+      component: UpdateWriteComponent,
+      props: true,
+    },
+    {
+      path: '/detail/:id',
+      name: 'PostDetail',
+      component: PostDetail,
+      props: true,
     },
   ],
 });

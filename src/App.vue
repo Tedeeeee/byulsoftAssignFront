@@ -1,42 +1,37 @@
 <template>
   <q-layout view="hHh lpR fff">
-    <q-header reveal elevated class="bg-primary text-white" height-hint="98">
+    <q-header reveal elevated class="bg-tera text-white" height-hint="98">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
-
         <q-toolbar-title @click="goHome" class="cursor-pointer">
           <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
+            <img :src="logo" alt="Logo" />
           </q-avatar>
-          Title
+          요방어때
         </q-toolbar-title>
+
         <div class="q-pa-md q-gutter-sm">
-          <q-btn to="/login" color="black" label="로그인" />
-          <q-btn to="/signUp" color="black" label="회원가입" />
+          <q-btn to="/" color="black" label="목록" />
+          <template v-if="userStore.isLoggedIn">
+            <q-btn flat :label="userStore.userNickname" class="custom-link" />
+            <q-btn to="/insertWrite" color="black" label="글쓰기" />
+            <q-btn @click="handleLogout" color="black" label="로그아웃" />
+          </template>
+          <template v-else>
+            <q-btn to="/login" color="black" label="로그인" />
+            <q-btn to="/signUp" color="black" label="회원가입" />
+          </template>
         </div>
       </q-toolbar>
-
-      <q-tabs align="left">
-        <q-route-tab to="/board" label="게시판" />
-      </q-tabs>
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" elevated>
-      <!-- drawer content -->
-      <p>사이드 바입니다</p>
-    </q-drawer>
-
-    <q-page-container>
+    <q-page-container class="q-pa-none">
       <router-view />
     </q-page-container>
 
-    <q-footer reveal elevated class="bg-grey-8 text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
-          </q-avatar>
-          <div>Title</div>
+    <q-footer reveal elevated class="bg-grey-8 text-white" height-hint="50">
+      <q-toolbar class="justify-center">
+        <q-toolbar-title class="row items-center justify-center">
+          <div>이곳은 방탈출 리뷰 커뮤니티입니다</div>
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>
@@ -44,24 +39,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/useUserStore';
+import logo from './assets/로고.png';
+import { deleteRefreshToken } from '@/api';
+import { computed, ref } from 'vue';
 
 const router = useRouter();
-
-const leftDrawerOpen = ref(false);
-
-const toggleLeftDrawer = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-};
+const userStore = useUserStore();
 
 const goHome = () => {
   router.push('/');
 };
+
+const showSearch = computed(() => {
+  return router.path('/');
+});
+
+const handleLogout = async () => {
+  // 로그아웃 api 제작
+  userStore.logout();
+  await deleteRefreshToken();
+  router.push('/');
+};
+
+const searchQuery = ref('');
 </script>
 
 <style scoped>
 .cursor-pointer {
+  cursor: pointer;
+}
+
+.custom-link {
+  text-decoration: underline;
+  color: black;
   cursor: pointer;
 }
 </style>

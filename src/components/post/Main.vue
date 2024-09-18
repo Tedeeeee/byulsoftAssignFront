@@ -6,81 +6,37 @@
           <div class="text-h6">{{ modalMessage }}</div>
         </q-card-section>
         <q-card-actions align="center">
-          <q-btn flat label="수정하기" @click="closeModal" :to="`/updateWrite/${boardId}`" color="primary" />
+          <q-btn
+            v-if="modalMessage === '수정하시겠습니까?'"
+            flat
+            label="수정하기"
+            @click="closeModal"
+            :to="`/updatePost/${boardId}`"
+            color="primary"
+          />
+          <q-btn v-if="modalMessage === '삭제하시겠습니까?'" flat label="삭제하기" @click="deletePost(boardId)" color="primary" />
           <q-btn flat label="닫기" @click="closeModal" color="primary" />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
   <q-page padding>
-    <div class="q-gutter-md" v-if="review">
+    <div class="q-gutter-md" v-if="titleContents">
       <div class="post-card">
-        <q-card flat bordered class="q-pa-md">
-          <div class="row">
-            <div class="left-section q-mr-md">
-              <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />
-            </div>
-            <q-separator vertical />
-            <div class="right-section">
-              <div class="info-section q-mb-md">
-                <h4>[{{ review.region }}] {{ review.title }}</h4>
-              </div>
-              <q-separator />
-              <div class="row q-col-gutter-ms q-mt-md">
-                <div class="col">
-                  <span>작성자</span><br />
-                  <span class="col-2">{{ review.nickname }}</span>
-                </div>
-                <q-separator vertical />
-                <div class="col">
-                  <span>작성시간</span><br />
-                  <span class="col-3">{{ review.createdAt }}</span>
-                </div>
-                <q-separator vertical />
-                <div class="col">
-                  <span>조회수</span><br />
-                  <span class="col-2">{{ review.view }}</span>
-                </div>
-                <q-separator vertical />
-                <div class="col">
-                  <span>좋아요</span><br />
-                  <span class="col-2">{{ review.likes }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </q-card>
+        <title-contents :title="titleContents" />
       </div>
 
-      <div v-if="review.nickname === nickname" class="button-container q-mt-md">
-        <q-btn label="수정" @click="showModal('수정하시겠습니까?')" color="primary" class="q-mr-xs" />
-        <q-btn label="삭제" @click="showModal('삭제하시겠습니까?')" color="negative" class="q-mr-xs" />
-      </div>
-      <div v-for="(star, idx) in review.boardStars" :key="idx" class="post-card">
-        <q-card flat bordered class="q-pa-sm">
-          <div class="row">
-            <div class="left-section q-mr-sm">
-              <q-img :src="images[idx]" alt="사진" style="width: 70px; height: 70px" />
-            </div>
-            <div class="right-section">
-              <div class="row q-mt-sm">
-                <div class="col">
-                  <q-rating v-model="star.starRating" max="5" readonly />
-                </div>
-              </div>
-              <div class="info-section q-mb-sm">
-                <h6>{{ star.starShortReview }}</h6>
-              </div>
-            </div>
-          </div>
-        </q-card>
+      <update-post :nickname="titleContents.memberNickname" @update-modal="showModal" @delete-modal="showModal" />
+      <div v-for="(star, idx) in boardStars" :key="idx" class="post-card">
+        <stars-comments :star="star" :image="images[idx]" />
         <q-separator />
       </div>
+
       <div class="review-summary q-mt-lg">
         <q-card flat class="q-pa-md review-summary-card">
           <q-img :src="totalReview" alt="사진" style="width: 170px; height: 170px" />
           <p class="text-center">
-            {{ review.contents }}
+            {{ titleContents.boardContent }}
           </p>
         </q-card>
         <q-separator />
@@ -93,7 +49,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import pathToImage from '@/assets/웃는 사진.jpeg';
 import totalReview from '@/assets/총평.png';
 import horrorImage from '@/assets/공포도.png';
 import difficultyImage from '@/assets/난이도.png';
@@ -103,44 +58,54 @@ import activityImage from '@/assets/활동성.png';
 import { findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
 import { Comment } from '@/type/Comment.ts';
 import { BoardStar, Post } from '@/type/BoardStarType';
-import CommentForm from '@/components/CommentForm.vue';
-import { deleteBoard, deleteContents, editCommentText, insertComment } from '@/api';
+import CommentForm from '@/components/post/CommentForm.vue';
+import { deleteCommentById, deletePostById, insertComment, updateComment } from '@/api';
+import UpdatePost from '@/components/post/UpdatePost.vue';
+import TitleContents from '@/components/post/TitleContents.vue';
+import StarsComments from '@/components/post/StarsComments.vue';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 
+const router = useRouter();
 const images = [difficultyImage, storyImage, interiorImage, activityImage, horrorImage];
-const imageSource = ref(pathToImage);
-const nickname = useUserStore().userNickname;
 const props = defineProps<{
   id: string;
 }>();
-const boardId = props.id;
-const boardStars = ref<BoardStar[]>([]);
-const comments = ref<Comment[]>([]);
-const review = ref<Post | undefined>();
+const boardId = parseInt(props.id);
+const titleContents = ref<Post | undefined>();
+const boardStars = ref<BoardStar[] | undefined>([]);
+const comments = ref<Comment[] | undefined>([]);
 const isDialogOpen = ref(false);
 const modalMessage = ref('');
 
-const transformToReview = (serverData): Post => {
+const transformToTitleContents = (serverData): Post => {
   return {
-    id: serverData.id,
-    title: serverData.title,
-    contents: serverData.contents,
-    region: serverData.region,
-    nickname: serverData.nickname,
-    createdAt: serverData.createdAt,
-    view: serverData.view,
-    likes: serverData.likes,
-    boardStars: serverData.boardStars,
+    boardId: serverData.boardId,
+    boardTitle: serverData.boardTitle,
+    boardContent: serverData.boardContent,
+    boardRegion: serverData.boardRegion,
+    memberNickname: serverData.memberNickname,
+    boardCreatedAt: serverData.boardCreatedAt,
+    boardView: serverData.boardView,
+    boardLikes: serverData.boardLikes,
+  };
+};
+
+const transformToBoardStar = (serverData): BoardStar => {
+  return {
+    boardStarType: serverData.boardStarType,
+    boardStarShortReview: serverData.boardStarShortReview,
+    boardStarRating: serverData.boardStarRating,
   };
 };
 
 const transformToComment = (serverData): Comment => {
   return {
-    id: serverData.id,
+    commentId: serverData.commentId,
     memberId: serverData.memberId,
-    username: serverData.nickname,
-    date: serverData.updatedAt,
-    text: serverData.content,
+    memberNickname: serverData.memberNickname,
+    commentUpdatedAt: serverData.commentUpdatedAt,
+    commentContent: serverData.commentContent,
     replies: [],
     newReply: '',
     showReplyForm: false,
@@ -150,8 +115,8 @@ const transformToComment = (serverData): Comment => {
 
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  console.log(response.data);
-  review.value = transformToReview(response.data);
+  titleContents.value = transformToTitleContents(response.data);
+  boardStars.value = response.data.boardStars.map(transformToBoardStar);
   comments.value = response.data.comments.map(transformToComment);
 };
 
@@ -160,26 +125,31 @@ const showModal = (message: string) => {
   modalMessage.value = message;
   isDialogOpen.value = true;
 };
+
 const closeModal = () => {
   isDialogOpen.value = false;
 };
 
 /* 게시글 삭제 */
-const deletePost = async () => {
-  console.log('게시글 삭제');
-  const response = await deleteBoard(boardId);
+const deletePost = async (boardId: number) => {
+  const response = await deletePostById(boardId);
+  await router.push('/');
   console.log(response);
 };
 
 /* 댓글 추가 */
 const addComment = async content => {
   console.log('댓글 추가');
+  console.log(content);
   const data = {
-    content: content,
+    memberId: 1,
+    commentContent: content,
     boardId: boardId,
+    memberNickname: useUserStore().userNickname
   };
 
   const response = await insertComment(data);
+  console.log(response);
   comments.value = response.data.map(transformToComment);
 };
 
@@ -189,19 +159,19 @@ const editComment = async (text, id) => {
   console.log(text);
   console.log(id);
   const data = {
-    content: text,
-    id: id,
+    commentContent: text,
+    commentId: id,
     boardId: boardId,
   };
 
-  const response = await editCommentText(data);
+  const response = await updateComment(data);
   comments.value = response.data.map(transformToComment);
 };
 
 /* 댓글 삭제 */
 const deleteComment = async id => {
   console.log('댓글 삭제');
-  await deleteContents(id);
+  await deleteCommentById(id);
   /*삭제 후 해당 보드의 댓글 다시 로드*/
   const response = await findCommentsByBoardId(boardId);
   comments.value = response.data.map(transformToComment);

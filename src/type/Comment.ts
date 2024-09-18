@@ -1,9 +1,9 @@
 export interface Comment {
-  id: number;
+  commentId: number;
   memberId: number;
-  username: string;
-  date: string;
-  text: string;
+  memberNickname: string;
+  commentUpdatedAt: string;
+  commentContent: string;
   replies: Reply[];
   newReply: string;
   showReplyForm: boolean;

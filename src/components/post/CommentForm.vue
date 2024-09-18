@@ -1,25 +1,26 @@
 <template>
+  {{ comments }}
   <div class="comment-section q-mt-lg">
     <h5>댓글</h5>
     <div class="q-mt-md">
-      <q-card v-for="comment in comments" :key="comment.id" flat bordered class="q-pa-md comment-card">
+      <q-card v-for="(comment, idx) in comments" :key="idx" flat bordered class="q-pa-md comment-card">
         <div class="comment-header row items-center q-mb-md">
-          <strong class="col">{{ comment.username }}</strong>
-          <span>{{ comment.date }}</span>
-          <div v-if="comment.username === currentUser" class="comment-actions col-auto">
+          <strong class="col">{{ comment.memberNickname }}</strong>
+          <span>{{ comment.commentUpdatedAt }}</span>
+          <div v-if="comment.memberNickname === nickname" class="comment-actions col-auto">
             <q-btn flat label="수정" @click="comment.isEdit = !comment.isEdit" color="primary" class="q-mr-xs" />
-            <q-btn flat label="삭제" @click="$emit('deleteComment', comment.id)" color="negative" class="q-mr-xs" />
+            <q-btn flat label="삭제" @click="$emit('deleteComment', comment.commentId)" color="negative" class="q-mr-xs" />
           </div>
           <div v-else class="col-auto">
-            <q-btn flat label="답변" @click="toggleReply(comment.id)" color="secondary" />
+            <q-btn flat label="답변" @click="toggleReply(comment.commentId)" color="secondary" />
           </div>
         </div>
         <q-separator />
         <div v-if="comment.isEdit">
-          <q-input filled v-model="comment.text" label="댓글을 수정하세요" type="textarea" rows="3" class="q-mb-md" />
-          <q-btn label="수정하기" @click="$emit('editComment', comment.text, comment.id)" color="primary" />
+          <q-input filled v-model="comment.commentContent" label="댓글을 수정하세요" type="textarea" rows="3" class="q-mb-md" />
+          <q-btn label="수정하기" @click="$emit('editComment', comment.commentContent, comment.commentId)" color="primary" />
         </div>
-        <p v-if="!comment.isEdit" class="comment-text">{{ comment.text }}</p>
+        <p v-if="!comment.isEdit" class="comment-text">{{ comment.commentContent }}</p>
         <div v-if="comment.showReplyForm" class="q-mt-md">
           <q-card flat bordered class="q-pa-md">
             <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
@@ -52,8 +53,9 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue';
 import { Comment } from '@/type/Comment';
+import { useUserStore } from '@/stores/useUserStore';
 
-const nickname = localStorage.getItem('user');
+const nickname = useUserStore().userNickname;
 const currentUser = ref(nickname);
 const props = defineProps<{
   comments: Comment[];

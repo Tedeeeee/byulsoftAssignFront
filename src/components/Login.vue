@@ -15,11 +15,10 @@
   <q-page class="login-page">
     <q-card class="login-card" flat bordered>
       <q-card-section class="q-pt-none">
-        {{ loginData }}
         <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
-          <q-input v-model="loginData.email" label="Email" type="email" outlined class="q-mb-md" />
-          <q-input v-model="loginData.password" label="Password" type="password" outlined class="q-mb-md" />
+          <q-input v-model="loginData.memberEmail" label="Email" type="email" outlined class="q-mb-md" />
+          <q-input v-model="loginData.memberPassword" label="Password" type="password" outlined class="q-mb-md" />
           <q-btn label="Login" type="submit" color="primary" class="full-width" />
           <div class="text-center q-mt-md">
             <q-btn flat label="혹시 회원이 아니신가요?" to="/signUp" class="custom-link" />
@@ -37,7 +36,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import { login } from '@/api/auth';
 
-type LoginData = Pick<UserData, 'email' | 'password'>;
+type LoginData = Pick<UserData, 'memberEmail' | 'memberPassword'>;
 
 const router = useRouter();
 const isDialogOpen = ref(false);
@@ -57,7 +56,7 @@ const loginData = ref<LoginData>({
 
 const handleSubmit = async () => {
   try {
-    const response = await login(loginData.value.email, loginData.value.password);
+    const response = await login(loginData.value.memberEmail, loginData.value.memberPassword);
     if (response.status === 200) {
       console.log(response);
       userStore.login(response.data);

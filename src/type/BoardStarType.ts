@@ -1,19 +1,18 @@
 export interface BoardStar {
-  id: number;
+  boardStarId: number;
   boardId: number;
-  starType: string;
-  starShortReview: string;
-  starRating: number;
+  boardStarType: string;
+  boardStarShortReview: string;
+  boardStarRating: number;
 }
 
 export interface Post {
-  id: number;
-  title: string;
-  contents: string;
-  region: string;
-  nickname: string;
-  createdAt: string;
+  boardId: number;
+  boardTitle: string;
+  boardContent: string;
+  boardRegion: string;
+  boardCreatedAt: string;
   boardStars: BoardStar[];
-  view: 0;
-  likes: 0;
+  boardView: 0;
+  boardLikes: 0;
 }

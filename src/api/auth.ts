@@ -23,30 +23,30 @@ export const register = userData => {
   return instance.post('members/register', userData);
 };
 
-export const login = (email: string, password: string) => {
-  return instance.post('login', { email, password });
+export const login = (memberEmail: string, memberPassword: string) => {
+  return instance.post('login', { memberEmail, memberPassword });
 };
 
 export const getAllBoard = (pageNumber: number) => {
-  return instance.get('boards/allBoard', {
+  return instance.get('boards', {
     params: {
       pn: pageNumber,
     },
   });
 };
 
-export const sortBoardByCategory = async (sortName: string, sortType: string, pn: number): Promise<any> => {
+export const sortBoardByCategory = async (sortOrder: string, sortType: string, pn: number): Promise<any> => {
   return instance.get('boards/sort', {
     params: {
+      sortOrder: sortOrder,
       sortType: sortType,
-      sortName: sortName,
       pn: pn,
     },
   });
 };
 
 export const getBoardById = async (id): Promise<Post> => {
-  return instance.get(`boards/detail/${id}`);
+  return instance.get(`boards/${id}`);
 };
 
 export const findCommentsByBoardId = (boardId: number) => {
@@ -58,5 +58,5 @@ export const getSortBoardByCategory = (name: string) => {
 };
 
 export const getPostsCount = () => {
-  return instance.get('boards/countPage');
+  return instance.get('boards/count');
 };

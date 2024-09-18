@@ -13,7 +13,7 @@
           <q-btn to="/" color="black" label="목록" />
           <template v-if="userStore.isLoggedIn">
             <q-btn flat :label="userStore.userNickname" class="custom-link" />
-            <q-btn to="/insertWrite" color="black" label="글쓰기" />
+            <q-btn to="/insertPost" color="black" label="글쓰기" />
             <q-btn @click="handleLogout" color="black" label="로그아웃" />
           </template>
           <template v-else>
@@ -42,10 +42,8 @@
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import logo from './assets/로고.png';
-import { deleteRefreshToken } from '@/api';
-import { computed, ref } from 'vue';
+import { logout } from '@/api';
 
-const searchQuery = ref('');
 const router = useRouter();
 const userStore = useUserStore();
 
@@ -53,15 +51,10 @@ const goHome = () => {
   router.push('/');
 };
 
-const showSearch = computed(() => {
-  return router.path('/');
-});
-
 const handleLogout = async () => {
-  // 로그아웃 api 제작
   userStore.logout();
   await logout();
-  router.push('/');
+  await router.push('/');
 };
 
 </script>

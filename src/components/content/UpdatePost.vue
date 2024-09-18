@@ -1,9 +1,9 @@
 <template>
   <q-page padding>
-    <q-form v-if="review" @submit.prevent="submitForm" class="q-gutter-md">
-      <write-contents v-model="review" />
-      <q-btn label="수정" @click="showModal('정말로 수정하시겠습니까?')" color="primary" class="q-mr-xs" />
-      <!--      <q-btn type="submit" label="수정하기" color="primary" class="button-container q-mt-md" />-->
+    <q-form v-if="postContents" @submit.prevent="submitForm" class="q-gutter-md">
+      <write-contents v-model="postContents" />
+      <q-btn type="submitForm" label="수정하기" color="primary" class="button-container q-mt-md" />
+<!--      <q-btn label="수정" @click="showModal('정말로 수정하시겠습니까?')" color="primary" class="q-mr-xs" />
       <div>
         <q-dialog v-model="isDialogOpen">
           <q-card>
@@ -16,18 +16,18 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-      </div>
+      </div>-->
     </q-form>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import WriteContents from '@/components/content/WriteContents.vue';
+import WriteContents from '@/components/content/PostContents.vue';
 import { onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { Post } from '@/type/BoardStarType';
 import { getBoardById } from '@/api/auth';
-import { updateContents } from '@/api';
+import { updatePost } from '@/api';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -35,55 +35,46 @@ const props = defineProps<{
   id: string;
 }>();
 const $q = useQuasar();
-const review = ref<Post | undefined>();
+const postContents = ref<Post | undefined>();
 const boardId = parseInt(props.id);
 const modalMessage = ref<string>('');
 const isDialogOpen = ref(false);
 
-const showModal = (message: string) => {
-  modalMessage.value = message;
-  isDialogOpen.value = true;
-};
-const closeModal = () => {
-  isDialogOpen.value = false;
-};
+// const showModal = (message: string) => {
+//   modalMessage.value = message;
+//   isDialogOpen.value = true;
+// };
+// const closeModal = () => {
+//   isDialogOpen.value = false;
+// };
 
-const transformToReview = (serverData: Post) => {
+const transformToPost = (serverData: Post) => {
   return {
-    id: serverData.id,
-    title: serverData.title,
-    contents: serverData.contents,
-    region: serverData.region,
-    nickname: serverData.nickname,
-    createdAt: serverData.createdAt,
-    boardStars: serverData.boardStars,
-    view: serverData.view,
-    likes: serverData.likes,
+    boardId: serverData.boardId,
+    boardTitle: serverData.boardTitle,
+    boardContent: serverData.boardContent,
+    boardRegion: serverData.boardRegion,
+    memberNickname: serverData.memberNickname,
+    boardCreatedAt: serverData.boardCreatedAt,
+    boardView: serverData.boardView,
+    boardLikes: serverData.boardLikes,
+    boardStars: serverData.boardStars
   };
 };
 
 /* boardId를 통해 데이터를 다시 받아서 셋팅을 한다 */
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  console.log(response);
-  review.value = transformToReview(response.data);
+  postContents.value = transformToPost(response.data);
 };
 
 const submitForm = async () => {
   try {
     isDialogOpen.value = false;
-    await updateContents(review.value);
-    await router.push(`/detail/${boardId}`);
+    await updatePost(postContents.value);
+    await router.push(`/${boardId}`);
   } catch (error) {
     console.log(error);
-    const errorMessage = error.response.data.errors[0].defaultMessage;
-    if (errorMessage === '별점 평가는 최소 1점 이상이어야 합니다') {
-      $q.notify({
-        type: 'negative',
-        message: errorMessage,
-        position: 'top',
-      });
-    }
   }
 };
 

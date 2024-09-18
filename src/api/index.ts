@@ -1,9 +1,4 @@
-import { createInstanceWithAuth } from '@/api/common/interceptors';
-
-export const healthCheck = () => {
-  const instance = createInstanceWithAuth('members/healthCheck');
-  return instance.get();
-};
+import { createInstanceWithAuth } from '@/api/interceptors';
 
 export const insertContents = data => {
   const instance = createInstanceWithAuth('boards/insertContents');
@@ -25,8 +20,8 @@ export const deleteContents = id => {
   return instance.delete();
 };
 
-export const deleteRefreshToken = () => {
-  const instance = createInstanceWithAuth('members');
+export const logout = () => {
+  const instance = createInstanceWithAuth('members/logout');
   return instance.patch();
 };
 

@@ -1,14 +1,18 @@
-import { createInstance } from '@/api/common/interceptors';
+import { createInstance } from '@/api/interceptors';
 import type { Post } from '@/type/BoardStarType';
 
 const instance = createInstance();
 
 export const checkNickname = (nickname: string) => {
-  return instance.get('members/checkNickname', { params: { nickname: nickname } });
+  return instance.get('members/nicknames/check', {
+    params: {
+      nickname: nickname
+    }
+  });
 };
 
 export const checkEmail = (email: string) => {
-  return instance.get('members/checkEmail', {
+  return instance.get('members/emails/check', {
     params: {
       email: email,
     },

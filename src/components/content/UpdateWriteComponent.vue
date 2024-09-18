@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import WriteContents from '@/components/WriteContents.vue';
+import WriteContents from '@/components/content/WriteContents.vue';
 import { onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { Post } from '@/type/BoardStarType';

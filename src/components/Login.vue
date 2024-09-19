@@ -59,7 +59,7 @@ const handleSubmit = async () => {
     const response = await login(loginData.value.memberEmail, loginData.value.memberPassword);
     if (response.status === 200) {
       console.log(response);
-      userStore.login(response.data);
+      userStore.login(response.data.memberNickname);
       await router.push('/');
     }
   } catch (error) {

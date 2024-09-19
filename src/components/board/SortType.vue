@@ -83,15 +83,15 @@
 import { ref } from 'vue';
 const props = defineProps<{
   page: number;
-}>()
+}>();
 const emit = defineEmits<{
-  (e: 'sort', sortOrder: string, sortType: string, pageNum: number): void;
-}>()
+  (e: 'sort', sortOrder: string, sortType: string, pageNumber: number): void;
+}>();
 
 const sortData = ref({
   sortOrder: '',
   sortType: '',
-  pageNum: props.page,
+  pageNumber: props.page,
 });
 
 const handleSort = (order, type) => {
@@ -104,7 +104,6 @@ const handleSort = (order, type) => {
 const isActive = (name: string, type: string) => {
   return sortData.value.sortType === name && sortData.value.sortOrder === type;
 };
-
 </script>
 
 <style scoped>

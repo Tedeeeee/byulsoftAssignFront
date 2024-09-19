@@ -21,22 +21,25 @@
     </q-dialog>
   </div>
   <q-page padding>
-    <div class="q-gutter-md" v-if="titleContents">
+    <div class="q-gutter-md" v-if="postHeadData">
       <div class="post-card">
-        <title-contents :title="titleContents" />
+        <post-head-contents :postHeadData="postHeadData" />
       </div>
-
-      <update-post :nickname="titleContents.memberNickname" @update-modal="showModal" @delete-modal="showModal" />
+      <!-- 여기서 nickname을 확인하고 컴포넌트를 띄워주면 된다     -->
+      <update-or-delete-button
+        v-if="postHeadData.memberNickname === useUserStore().userNickname"
+        @update-modal="showModal"
+        @delete-modal="showModal"
+      />
       <div v-for="(star, idx) in boardStars" :key="idx" class="post-card">
         <stars-comments :star="star" :image="images[idx]" />
         <q-separator />
       </div>
-
       <div class="review-summary q-mt-lg">
         <q-card flat class="q-pa-md review-summary-card">
           <q-img :src="totalReview" alt="사진" style="width: 170px; height: 170px" />
           <p class="text-center">
-            {{ titleContents.boardContent }}
+            {{ postHeadData.boardContent }}
           </p>
         </q-card>
         <q-separator />
@@ -55,16 +58,17 @@ import difficultyImage from '@/assets/난이도.png';
 import storyImage from '@/assets/스토리.png';
 import interiorImage from '@/assets/인테리어.png';
 import activityImage from '@/assets/활동성.png';
-import { findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
+import { checkNickname, findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
 import { Comment } from '@/type/Comment.ts';
 import { BoardStar, Post } from '@/type/BoardStarType';
 import CommentForm from '@/components/post/CommentForm.vue';
 import { deleteCommentById, deletePostById, insertComment, updateComment } from '@/api';
-import UpdatePost from '@/components/post/UpdatePost.vue';
-import TitleContents from '@/components/post/TitleContents.vue';
-import StarsComments from '@/components/post/StarsComments.vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
+import StarsComments from '@/components/post/StarsComments.vue';
+import PostHeadContents from '@/components/post/PostHeadContents.vue';
+import { negativeNotify } from '@/common/CommonNotify';
+import UpdateOrDeleteButton from '@/components/post/UpdateOrDeleteButton.vue';
 
 const router = useRouter();
 const images = [difficultyImage, storyImage, interiorImage, activityImage, horrorImage];
@@ -72,13 +76,13 @@ const props = defineProps<{
   id: string;
 }>();
 const boardId = parseInt(props.id);
-const titleContents = ref<Post | undefined>();
+const postHeadData = ref<Omit<Post, 'boardStar'> | undefined>();
 const boardStars = ref<BoardStar[] | undefined>([]);
 const comments = ref<Comment[] | undefined>([]);
 const isDialogOpen = ref(false);
 const modalMessage = ref('');
 
-const transformToTitleContents = (serverData): Post => {
+const transformToPostHeadData = (serverData: Post): Omit<Post, 'boardStars'> => {
   return {
     boardId: serverData.boardId,
     boardTitle: serverData.boardTitle,
@@ -91,7 +95,7 @@ const transformToTitleContents = (serverData): Post => {
   };
 };
 
-const transformToBoardStar = (serverData): BoardStar => {
+const transformToBoardStar = (serverData: BoardStar): Omit<BoardStar, 'boardId' | 'boardStarId'> => {
   return {
     boardStarType: serverData.boardStarType,
     boardStarShortReview: serverData.boardStarShortReview,
@@ -106,8 +110,6 @@ const transformToComment = (serverData): Comment => {
     memberNickname: serverData.memberNickname,
     commentUpdatedAt: serverData.commentUpdatedAt,
     commentContent: serverData.commentContent,
-    replies: [],
-    newReply: '',
     showReplyForm: false,
     isEdit: false,
   };
@@ -115,7 +117,7 @@ const transformToComment = (serverData): Comment => {
 
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  titleContents.value = transformToTitleContents(response.data);
+  postHeadData.value = transformToPostHeadData(response.data);
   boardStars.value = response.data.boardStars.map(transformToBoardStar);
   comments.value = response.data.comments.map(transformToComment);
 };
@@ -132,34 +134,33 @@ const closeModal = () => {
 
 /* 게시글 삭제 */
 const deletePost = async (boardId: number) => {
-  const response = await deletePostById(boardId);
+  await deletePostById(boardId);
   await router.push('/');
-  console.log(response);
 };
 
 /* 댓글 추가 */
 const addComment = async content => {
-  console.log('댓글 추가');
-  console.log(content);
-  const data = {
-    memberId: 1,
+  if (content.trim() === '') {
+    negativeNotify('글을 입력해주세요');
+    return;
+  }
+
+  const response = await insertComment({
     commentContent: content,
     boardId: boardId,
-    memberNickname: useUserStore().userNickname
-  };
-
-  const response = await insertComment(data);
-  console.log(response);
+    memberNickname: useUserStore().userNickname,
+  });
   comments.value = response.data.map(transformToComment);
 };
 
 /*댓글 수정*/
-const editComment = async (text, id) => {
-  console.log('댓글 수정');
-  console.log(text);
-  console.log(id);
+const editComment = async (content, id) => {
+  if (content.trim() === '') {
+    negativeNotify('글을 입력해주세요');
+    return;
+  }
   const data = {
-    commentContent: text,
+    commentContent: content,
     commentId: id,
     boardId: boardId,
   };
@@ -169,9 +170,9 @@ const editComment = async (text, id) => {
 };
 
 /* 댓글 삭제 */
-const deleteComment = async id => {
-  console.log('댓글 삭제');
-  await deleteCommentById(id);
+const deleteComment = async (commentId: number) => {
+  console.log(commentId);
+  await deleteCommentById(commentId);
   /*삭제 후 해당 보드의 댓글 다시 로드*/
   const response = await findCommentsByBoardId(boardId);
   comments.value = response.data.map(transformToComment);
@@ -221,33 +222,8 @@ onMounted(() => {
 .q-pa-md {
   padding: 0.5rem;
 }
-
-.q-pa-sm {
-  padding: 0.5rem;
-}
-
-.q-mr-md {
-  margin-right: 0.5rem;
-}
-
-.q-mr-sm {
-  margin-right: 0.25rem;
-}
-
-.q-mb-md {
-  margin-bottom: 1rem;
-}
-
-.q-mb-sm {
-  margin-bottom: 0.5rem;
-}
-
 .q-mt-lg {
   margin-top: 32px;
-}
-
-.q-mb-md {
-  margin-bottom: 16px;
 }
 
 .review-summary {
@@ -263,5 +239,9 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+.text-center {
+  white-space: pre-wrap;
 }
 </style>

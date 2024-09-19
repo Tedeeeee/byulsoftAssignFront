@@ -1,5 +1,4 @@
 <template>
-  {{ comments }}
   <div class="comment-section q-mt-lg">
     <h5>댓글</h5>
     <div class="q-mt-md">
@@ -10,9 +9,6 @@
           <div v-if="comment.memberNickname === nickname" class="comment-actions col-auto">
             <q-btn flat label="수정" @click="comment.isEdit = !comment.isEdit" color="primary" class="q-mr-xs" />
             <q-btn flat label="삭제" @click="$emit('deleteComment', comment.commentId)" color="negative" class="q-mr-xs" />
-          </div>
-          <div v-else class="col-auto">
-            <q-btn flat label="답변" @click="toggleReply(comment.commentId)" color="secondary" />
           </div>
         </div>
         <q-separator />
@@ -25,21 +21,6 @@
           <q-card flat bordered class="q-pa-md">
             <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
             <q-btn label="답변하기" @click="addReply(index)" color="primary" />
-          </q-card>
-        </div>
-
-        <div v-if="comment.replies.length" class="q-mt-md">
-          <q-card flat bordered class="q-pa-md" v-for="(reply, rIndex) in comment.replies" :key="rIndex">
-            <div class="comment-header row items-center q-mb-md">
-              <strong class="col">{{ reply.username }}</strong>
-              <span>{{ reply.date }}</span>
-              <div v-if="comment.username === currentUser" class="comment-actions col-auto">
-                <q-btn flat label="수정" @click="editComment(index)" color="primary" class="q-mr-xs" />
-                <q-btn flat label="삭제" @click="$emit('deleteComment', comment.id)" color="negative" class="q-mr-xs" />
-              </div>
-            </div>
-            <q-separator />
-            <p>{{ reply.text }}</p>
           </q-card>
         </div>
       </q-card>
@@ -56,13 +37,12 @@ import { Comment } from '@/type/Comment';
 import { useUserStore } from '@/stores/useUserStore';
 
 const nickname = useUserStore().userNickname;
-const currentUser = ref(nickname);
 const props = defineProps<{
   comments: Comment[];
 }>();
 
 const emit = defineEmits<{
-  (e: 'editComment', text: string, id: number): void;
+  (e: 'editComment', content: string, id: number): void;
   (e: 'deleteComment', id: number): void;
   (e: 'addComment', content: string): void;
 }>();
@@ -71,15 +51,16 @@ const newComment = ref('');
 
 const submitComment = () => {
   if (newComment.value.trim) {
+    console.log(newComment.value.trim);
     emit('addComment', newComment.value);
     newComment.value = '';
   }
 };
 
-/* 수정 댓글 open or close */
+/*/!* 수정 댓글 open or close *!/
 const toggleReply = index => {
   comments.value[index].showReplyForm = !comments.value[index].showReplyForm;
-};
+};*/
 </script>
 
 <style scoped>

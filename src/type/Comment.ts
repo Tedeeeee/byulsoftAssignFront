@@ -4,8 +4,6 @@ export interface Comment {
   memberNickname: string;
   commentUpdatedAt: string;
   commentContent: string;
-  replies: Reply[];
-  newReply: string;
   showReplyForm: boolean;
   isEdit: boolean;
 }

@@ -2,17 +2,18 @@
   <q-card flat bordered class="q-pa-md post-card" @click="$emit('detailPost', item.boardId)">
     <div class="row">
       <div class="left-section q-mr-md">
-        <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />
+        <span style="font-size: 80px; font-weight: bold; margin-left: 10px">{{ item.boardId }}</span>
+        <!--        <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />-->
       </div>
       <q-separator vertical />
       <div class="right-section">
         <div class="info-section q-mb-md">
           <h4>[{{ item.boardRegion }}] {{ item.boardTitle }}</h4>
           <div class="info-row row items-center q-gutter-sm">
-            <span class="col-3">작성자: {{ item.memberNickname }}</span>
-            <span class="col-3">작성시간: {{ item.boardCreatedAt }}</span>
-            <span class="col-2">조회수: {{ item.boardView }}</span>
-            <span class="col-2">좋아요: {{ item.boardLikes }}</span>
+            <span class="col-5">작성자: {{ item.memberNickname }}</span>
+            <span class="col-5">작성시간: {{ item.boardCreatedAt }}</span>
+            <!--            <span class="col-2">조회수: {{ item.boardView }}</span>
+            <span class="col-2">좋아요: {{ item.boardLikes }}</span>-->
           </div>
         </div>
         <q-separator />
@@ -29,11 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import pathToImage from '@/assets/웃는 사진.jpeg';
 import type { Post } from '@/type/BoardStarType';
 
 const typeName = ['난이도', '스토리', '인테리어', '활동성', '공포도'];
-const imageSource = pathToImage;
 const props = defineProps<{
   item: Post;
 }>();
@@ -80,6 +79,10 @@ const emit = defineEmits<{
 }
 
 .col-3 {
+  flex: 3;
+}
+
+.col-5 {
   flex: 3;
 }
 

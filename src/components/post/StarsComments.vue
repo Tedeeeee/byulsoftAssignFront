@@ -19,21 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import difficultyImage from '@/assets/난이도.png';
-import storyImage from '@/assets/스토리.png';
-import interiorImage from '@/assets/인테리어.png';
-import activityImage from '@/assets/활동성.png';
-import horrorImage from '@/assets/공포도.png';
 import type { BoardStar } from '@/type/BoardStarType';
 
-const images = [difficultyImage, storyImage, interiorImage, activityImage, horrorImage];
 const props = defineProps<{
-  star : BoardStar,
-  image : string
-}>()
-
+  star: BoardStar;
+  image: string;
+}>();
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

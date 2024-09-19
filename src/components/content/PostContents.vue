@@ -32,8 +32,7 @@
         <div class="title">{{ typeName[idx] }}</div>
       </div>
       <div style="flex: 8">
-        <q-rating v-model="type.boardStarRating" max="5" color="amber" icon="star"
-                  label="별점" />
+        <q-rating v-model="type.boardStarRating" max="5" color="amber" icon="star" label="별점" />
       </div>
     </div>
     <q-input maxlength="100" v-model="type.boardStarShortReview" class="contentsText" label="한줄평" filled />
@@ -42,6 +41,7 @@
   <div class="title">총평</div>
   <q-input
     v-model="postContents.boardContent"
+    maxlength="2000"
     class="contentsText"
     label="내용"
     type="textarea"
@@ -53,20 +53,13 @@
 
 <script setup lang="ts">
 import { regionOptions } from '@/type/Contents';
-import { useQuasar } from 'quasar';
+import { negativeNotify } from '@/common/CommonNotify';
 
-const $q = useQuasar();
 const postContents = defineModel();
 const typeName = ['난이도', '스토리', '인테리어', '활동성', '공포도'];
 
 const notifyError = (message: string) => {
-  $q.notify({
-    message: message,
-    color: 'negative',
-    position: 'top',
-    timeout: 2000,
-  });
-  return false;
+  negativeNotify(message);
 };
 </script>
 

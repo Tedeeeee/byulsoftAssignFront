@@ -10,6 +10,7 @@ export interface Post {
   boardId: number;
   boardTitle: string;
   boardContent: string;
+  memberNickname: string;
   boardRegion: string;
   boardCreatedAt: string;
   boardStars: BoardStar[];

@@ -2,12 +2,13 @@
   <q-card flat bordered class="q-pa-md">
     <div class="row">
       <div class="left-section q-mr-md">
-        <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />
+        <span style="font-size: 100px; font-weight: bold; margin-left: 20px">{{ postHeadData.boardId }}</span>
+        <!--        <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />-->
       </div>
       <q-separator vertical />
       <div class="right-section">
         <div class="info-section q-mb-md">
-          <h4>[{{ title.boardRegion }}] {{ title.boardTitle }}</h4>
+          <h4>[{{ postHeadData.boardRegion }}] {{ postHeadData.boardTitle }}</h4>
         </div>
         <q-separator />
         <div class="row q-col-gutter-ms q-mt-md">
@@ -18,17 +19,17 @@
           <q-separator vertical />
           <div class="col">
             <span>작성시간</span><br />
-            <span class="col-3">{{ title.boardCreatedAt }}</span>
+            <span class="col-3">{{ postHeadData.boardCreatedAt }}</span>
           </div>
           <q-separator vertical />
           <div class="col">
             <span>조회수</span><br />
-            <span class="col-2">{{ title.boardView }}</span>
+            <span class="col-2">{{ postHeadData.boardView }}</span>
           </div>
           <q-separator vertical />
           <div class="col">
             <span>좋아요</span><br />
-            <span class="col-2">{{ title.boardLikes }}</span>
+            <span class="col-2">{{ postHeadData.boardLikes }}</span>
           </div>
         </div>
       </div>
@@ -37,15 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import pathToImage from '@/assets/웃는 사진.jpeg';
 import { Post } from '@/type/BoardStarType';
 import { useUserStore } from '@/stores/useUserStore';
-import { ref } from 'vue';
 
-const imageSource = ref(pathToImage);
 const nickname = useUserStore().userNickname;
 const props = defineProps<{
-  title: Post;
+  postHeadData: Omit<Post, 'boardStars'>;
 }>();
 </script>
 

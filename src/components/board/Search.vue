@@ -14,7 +14,7 @@
             <q-select filled v-model="text" :options="regionOptions" />
           </div>
           <div class="col-1 q-pa-sm">
-            <q-btn @click="$emit('searchPosts', text)" color="primary" icon="search" size="lg" />
+            <q-btn @click="$emit('searchPosts', select, text)" color="primary" icon="search" size="lg" />
           </div>
         </div>
       </div>
@@ -29,10 +29,6 @@ import { ref, watch } from 'vue';
 const selectCategory = ['제목', '지역'];
 const select = ref('제목');
 const text = ref('');
-
-const emit = defineEmits<{
-  (e: 'searchPosts', text: string): void;
-}>();
 
 watch(select, newValue => {
   if (newValue == '지역') {

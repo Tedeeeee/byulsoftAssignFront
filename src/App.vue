@@ -43,6 +43,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import logo from './assets/로고.png';
 import { logout } from '@/api';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -54,9 +55,11 @@ const goHome = () => {
 const handleLogout = async () => {
   userStore.logout();
   await logout();
+  location.reload();
   await router.push('/');
 };
 
+onMounted(() => {});
 </script>
 
 <style scoped>

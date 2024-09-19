@@ -1,13 +1,14 @@
 import { createInstance } from '@/api/interceptors';
 import type { Post } from '@/type/BoardStarType';
+import type { SearchCondition } from '@/type/Board';
 
 const instance = createInstance();
 
 export const checkNickname = (nickname: string) => {
   return instance.get('members/nicknames/check', {
     params: {
-      nickname: nickname
-    }
+      nickname: nickname,
+    },
   });
 };
 
@@ -27,26 +28,37 @@ export const login = (memberEmail: string, memberPassword: string) => {
   return instance.post('login', { memberEmail, memberPassword });
 };
 
-export const getAllBoard = (pageNumber: number) => {
-  return instance.get('boards', {
+export const getAllBoard = (searchType: string, searchText: string, pageNumber: number) => {
+  return instance.get('boards/basic', {
     params: {
-      pn: pageNumber,
+      searchType: searchType,
+      searchText: searchText,
+      pageNumber: pageNumber,
     },
   });
 };
 
-export const sortBoardByCategory = async (sortOrder: string, sortType: string, pn: number): Promise<any> => {
+export const sortBoardByCategory = async (
+  sortOrder: string,
+  sortType: string,
+  pageNumber: number,
+  searchType: string,
+  searchText: string,
+): Promise<SearchCondition> => {
   return instance.get('boards/sort', {
     params: {
       sortOrder: sortOrder,
       sortType: sortType,
-      pn: pn,
+      pageNumber: pageNumber,
+      searchType: searchType,
+      searchText: searchText,
     },
   });
 };
 
-export const getBoardById = async (id): Promise<Post> => {
-  return instance.get(`boards/${id}`);
+export const getBoardById = async (boardId: number): Promise<Post> => {
+  console.log(boardId);
+  return instance.get(`boards/${boardId}`);
 };
 
 export const findCommentsByBoardId = (boardId: number) => {
@@ -57,6 +69,11 @@ export const getSortBoardByCategory = (name: string) => {
   return instance.get(`boards/${name}`);
 };
 
-export const getPostsCount = () => {
-  return instance.get('boards/count');
+export const getPostsCount = (searchType: string, searchText: string) => {
+  return instance.get('boards/count', {
+    params: {
+      searchType: searchType,
+      searchText: searchText,
+    },
+  });
 };

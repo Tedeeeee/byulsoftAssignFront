@@ -8,7 +8,7 @@
             <q-input
               ref="emailInput"
               filled
-              maxlength="320"
+              maxlength="50"
               v-model="signUpData.memberEmail"
               label="이메일"
               type="email"
@@ -72,16 +72,17 @@
   </q-page>
 </template>
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { UserRegistData } from '@/type/User';
 import { useRouter } from 'vue-router';
 import { register, checkNickname, checkEmail } from '@/api/auth';
 import { useQuasar } from 'quasar';
+import { negativeNotify, positiveNotify } from '@/common/CommonNotify';
 
 const router = useRouter();
 const $q = useQuasar();
-const emailInput = ref(null);
-const nicknameInput = ref(null);
+const emailInput = ref<string>(null);
+const nicknameInput = ref<string>(null);
 
 const signUpData = ref<UserRegistData>({
   memberEmail: '',
@@ -99,7 +100,7 @@ const emailRules = [
   val => (signUpData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
 const nicknameRules = [
-  val => (val && val.length > 3) || '3글자 이상의 닉네임을 입력해주세요',
+  val => (val && val.length >= 3) || '3글자 이상의 닉네임을 입력해주세요',
   val => (signUpData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
 const nameRules = [
@@ -124,15 +125,11 @@ const phoneNumberRules = [
 ];
 const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signUpData.value.memberEmail));
 
-const isNicknameValid = computed(() => signUpData.value.memberNickname.length > 3);
+const isNicknameValid = computed(() => signUpData.value.memberNickname.length >= 3);
 
 const emailCheckDuplicate = async () => {
   if (!isEmailValid.value) {
-    $q.notify({
-      type: 'negative',
-      message: '올바른 이메일 형식을 작성해주세요',
-      position: 'top',
-    });
+    negativeNotify('올바른 이메일 형식을 작성해주세요');
     return;
   }
 
@@ -140,76 +137,45 @@ const emailCheckDuplicate = async () => {
     const response = await checkEmail(signUpData.value.memberEmail);
     if (response.data === '사용 가능한 이메일입니다.') {
       signUpData.value.emailCheck = true;
-      $q.notify({
-        type: 'positive',
-        message: '사용 가능한 이메일입니다.',
-        position: 'top',
-      });
+      positiveNotify('사용 가능한 이메일입니다');
       emailInput.value.resetValidation();
     } else {
       signUpData.value.emailCheck = false;
-      $q.notify({
-        type: 'negative',
-        message: '이메일 중복 체크에 실패했습니다.',
-        position: 'top',
-      });
+      negativeNotify('이메일 중복 체크에 실패하였습니다');
     }
   } catch (error) {
-    console.log(error);
-    $q.notify({
-      type: 'negative',
-      message: '이메일 중복 체크를 다시 진행해주세요',
-      position: 'top',
-    });
+    negativeNotify('이메일 중복 체크를 다시 진행해주세요');
     signUpData.value.emailCheck = false;
-    await nextTick();
     emailInput.value.focus();
   }
 };
 
 const nicknameCheckDuplicate = async () => {
   if (!isNicknameValid.value) {
-    $q.notify({
-      type: 'negative',
-      message: '3글자 이상의 닉네임을 입력해주세요',
-      position: 'top',
-    });
+    negativeNotify('3글자 이상의 닉네임을 입력해주세요');
     return;
   }
   try {
     const response = await checkNickname(signUpData.value.memberNickname);
     if (response.data === '사용 가능한 닉네임입니다.') {
       signUpData.value.nicknameCheck = true;
-      $q.notify({
-        type: 'positive',
-        message: '사용 가능한 닉네임입니다.',
-        position: 'top',
-      });
+      positiveNotify('사용 가능한 닉네임입니다');
       nicknameInput.value.resetValidation();
     } else {
       signUpData.value.nicknameCheck = false;
-      $q.notify({
-        type: 'negative',
-        message: '닉네임 중복 체크에 실패했습니다.',
-        position: 'top',
-      });
+      negativeNotify('닉네임 중복 체크에 실패했습니다');
     }
   } catch (e) {
     console.log(e);
-    $q.notify({
-      type: 'negative',
-      message: '해당 닉네임은 사용할 수 없습니다',
-      position: 'top',
-    });
+    negativeNotify('해당 닉네임은 사용할 수 없습니다');
     signUpData.value.nicknameCheck = false;
-    await nextTick();
     nicknameInput.value.focus();
   }
 };
 
 const handleSubmit = async () => {
   console.log('회원가입이 진행됩니다.');
-/*  const userData = ref<UserData>({
+  /*  const userData = ref<UserData>({
     email: signUpData.value.member,
     password: signUpData.value.password,
     name: signUpData.value.username,
@@ -222,7 +188,6 @@ const handleSubmit = async () => {
     await router.push('/login');
   } catch (err) {
     const errorMessage = err.response.data.message;
-    console.log(err.response.data.message);
     if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
       $q.notify({
         type: 'negative',

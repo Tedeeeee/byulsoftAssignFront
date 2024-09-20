@@ -14,7 +14,7 @@
         <div class="row q-col-gutter-ms q-mt-md">
           <div class="col">
             <span>작성자</span><br />
-            <span class="col-2">{{ nickname }}</span>
+            <span class="col-2">{{ postHeadData.memberNickname }}</span>
           </div>
           <q-separator vertical />
           <div class="col">
@@ -39,9 +39,7 @@
 
 <script setup lang="ts">
 import { Post } from '@/type/BoardStarType';
-import { useUserStore } from '@/stores/useUserStore';
 
-const nickname = useUserStore().userNickname;
 const props = defineProps<{
   postHeadData: Omit<Post, 'boardStars'>;
 }>();

@@ -12,11 +12,11 @@ import WriteContents from '@/components/content/PostContents.vue';
 import { ref } from 'vue';
 import { insertPost } from '@/api';
 import { useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
 import { Post } from '@/type/BoardStarType';
+import { useNotifications } from '@/common/CommonNotify';
 
+const { negativeNotify } = useNotifications();
 const router = useRouter();
-const $q = useQuasar();
 
 const postContents = ref<Post>({
   boardTitle: '',
@@ -36,28 +36,18 @@ const postContents = ref<Post>({
 const submitForm = async () => {
   for (let i = 0; i < postContents.value.boardStars.length; i++) {
     if (postContents.value.boardStars[i].boardStarRating === 0) {
-      $q.notify({
-        type: 'negative',
-        message: "별점을 입력해주세요",
-        position: 'top',
-      });
+      negativeNotify('별점을 입력해주세요');
       return;
     }
   }
 
   try {
-    console.log(postContents.value);
-    const response = await insertPost(postContents.value);
-    console.log(response);
+    await insertPost(postContents.value);
     await router.push('/');
   } catch (error) {
     const errorMessage = error.response.data.errors[0].defaultMessage;
     if (errorMessage === '체크되지 않은 별점이 존재합니다') {
-      $q.notify({
-        type: 'negative',
-        message: errorMessage,
-        position: 'top',
-      });
+      negativeNotify(errorMessage);
     }
   }
 };

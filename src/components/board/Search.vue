@@ -5,16 +5,16 @@
       <div class="flex justify-center items-center" style="height: 30%">
         <div class="row q-gutter-sm" style="width: 100%">
           <div class="col-3 q-pa-sm">
-            <q-select filled v-model="select" :options="selectCategory" label="카테고리" />
+            <q-select filled v-model="searchType" :options="selectCategory" label="카테고리" />
           </div>
-          <div v-if="select === '제목'" class="col-7 q-pa-sm">
-            <q-input standout="bg-teal text-white" v-model="text" label="검색" />
+          <div v-if="searchType === '제목'" class="col-7 q-pa-sm">
+            <q-input standout="bg-teal text-white" v-model="searchText" label="검색" />
           </div>
           <div v-else class="col-7 q-pa-sm">
-            <q-select filled v-model="text" :options="regionOptions" />
+            <q-select filled v-model="searchText" :options="regionOptions" />
           </div>
           <div class="col-1 q-pa-sm">
-            <q-btn @click="$emit('searchPosts', select, text)" color="primary" icon="search" size="lg" />
+            <q-btn @click="searchPost" color="primary" icon="search" size="lg" />
           </div>
         </div>
       </div>
@@ -27,14 +27,26 @@ import { regionOptions } from '@/type/Contents';
 import { ref, watch } from 'vue';
 
 const selectCategory = ['제목', '지역'];
-const select = ref('제목');
-const text = ref('');
+const props = defineProps<{
+  contents: string;
+  type: string;
+}>();
+const searchText = ref<string>(props.contents || '');
+const searchType = ref<string>(props.type || '제목');
 
-watch(select, newValue => {
+const emit = defineEmits<{
+  (e: 'searchPost', searchType: string, searchText: string): void;
+}>();
+
+const searchPost = () => {
+  emit('searchPost', searchType.value, searchText.value);
+};
+
+watch(searchType, newValue => {
   if (newValue == '지역') {
-    text.value = '서울';
+    searchText.value = '서울';
   } else {
-    text.value = '';
+    searchText.value = '';
   }
 });
 </script>

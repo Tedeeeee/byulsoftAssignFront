@@ -36,7 +36,7 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/:id',
+      path: '/:boardId',
       name: 'PostDetail',
       component: PostDetail,
       props: true,

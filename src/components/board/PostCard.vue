@@ -1,5 +1,5 @@
 <template>
-  <q-card flat bordered class="q-pa-md post-card" @click="$emit('detailPost', item.boardId)">
+  <q-card flat bordered class="q-pa-md post-card" @click="detailPost">
     <div class="row">
       <div class="left-section q-mr-md">
         <span style="font-size: 80px; font-weight: bold; margin-left: 10px">{{ item.boardId }}</span>
@@ -32,13 +32,25 @@
 <script setup lang="ts">
 import type { Post } from '@/type/BoardStarType';
 
+// let typeName: Record<number, string> = {
+//   1: '난이도',
+//   2: '스토리',
+//   3: '인테리어',
+//   4: '활동성',
+//   5: '공포도',
+// };
+
 const typeName = ['난이도', '스토리', '인테리어', '활동성', '공포도'];
 const props = defineProps<{
   item: Post;
 }>();
 const emit = defineEmits<{
-  (e: 'detailPost', id: number): void;
+  (e: 'detailPost', boardId: number): void;
 }>();
+
+const detailPost = () => {
+  emit('detailPost', props.item.boardId);
+};
 </script>
 
 <style scoped>
@@ -78,11 +90,11 @@ const emit = defineEmits<{
   gap: 8px;
 }
 
-.col-3 {
+.col-5 {
   flex: 3;
 }
 
-.col-5 {
+.col-3 {
   flex: 3;
 }
 

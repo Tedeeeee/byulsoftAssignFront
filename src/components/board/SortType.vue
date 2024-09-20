@@ -81,6 +81,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { SearchCondition } from '@/type/Board';
 const props = defineProps<{
   page: number;
 }>();
@@ -88,21 +89,21 @@ const emit = defineEmits<{
   (e: 'sort', sortOrder: string, sortType: string, pageNumber: number): void;
 }>();
 
-const sortData = ref({
+const sortData = ref<Pick<SearchCondition, 'searchType' | 'searchText' | 'pageNumber'>>({
   sortOrder: '',
   sortType: '',
   pageNumber: props.page,
 });
 
-const handleSort = (order, type) => {
-  sortData.value.sortOrder = order;
-  sortData.value.sortType = type;
+const handleSort = (sortOrder: string, sortType: string) => {
+  sortData.value.sortOrder = sortOrder;
+  sortData.value.sortType = sortType;
 
-  emit('sort', order, type, props.page);
+  emit('sort', sortOrder, sortType, props.page);
 };
 
-const isActive = (name: string, type: string) => {
-  return sortData.value.sortType === name && sortData.value.sortOrder === type;
+const isActive = (sortType: string, sortOrder: string) => {
+  return sortData.value.sortType === sortType && sortData.value.sortOrder === sortOrder;
 };
 </script>
 

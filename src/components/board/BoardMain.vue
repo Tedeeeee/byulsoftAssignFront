@@ -1,5 +1,5 @@
 <template>
-  <search @search-posts="searchPosts" />
+  <search :contents="searchCondition.searchText" :type="searchCondition.searchType" @searchPost="basicSearchPostList" />
   <sort-type :page="currentPage" @sort="sortPostList" />
   <q-page padding>
     <div class="q-gutter-md">
@@ -29,39 +29,49 @@ import type { SearchCondition } from '@/type/Board';
 import type { Post } from '@/type/BoardStarType';
 
 const router = useRouter();
-
 const posts = ref<Post[]>([]);
 const currentPage = ref<number>(1);
 const totalPages = ref<number>(1);
+
+// 초기화를 할때 URL을 가져와야 한다
+let href = window.location.href;
+let url = new URL(href);
 const searchCondition = ref<SearchCondition>({
-  searchType: '',
-  searchText: '',
-  sortOrder: '',
-  sortType: '',
-  pageNumber: currentPage.value,
+  searchType: url.searchParams.get('searchType') || '',
+  searchText: url.searchParams.get('searchText') || '',
+  sortOrder: url.searchParams.get('sortOrder') || '',
+  sortType: url.searchParams.get('sortType') || '',
+  pageNumber: url.searchParams.get('pageNumber') || currentPage.value,
 });
 
-const searchPosts = async (searchType: string, searchText: string) => {
+const detailPost = (boardId: number) => {
+  router.push({ name: 'PostDetail', params: { boardId: boardId } });
+};
+
+// 기본 정렬
+const basicSearchPostList = async (searchType: string, searchText: string) => {
+  await fetchPostCount();
   // 지역이 담겨있다면 지역 기준으로 값을 가져온다
   searchCondition.value.searchType = searchType;
   searchCondition.value.searchText = searchText;
   if (searchText == null || searchText == '') searchCondition.value.searchType = '';
-  await fetchPostCount();
-  const response = await getAllBoard(searchCondition.value.searchType, searchCondition.value.searchText, currentPage.value);
-  posts.value = response.data;
-};
 
-const detailPost = (boardId: number) => {
-  console.log(boardId);
-  router.push({ name: 'PostDetail', params: { id: boardId } });
+  const response = await getAllBoard(searchCondition.value.searchType, searchCondition.value.searchText, currentPage.value);
+  await router.push({
+    name: 'Board',
+    query: {
+      searchType: searchType,
+      searchText: searchText,
+    },
+  });
+  posts.value = response.data;
 };
 
 // 특수 장르를 기준으로 정렬
 const sortPostList = async (sortOrder: string, sortType: string, pageNumber: number) => {
   searchCondition.value.sortOrder = sortOrder;
   searchCondition.value.sortType = sortType;
-  searchCondition.value.sortOrder = sortOrder;
-  searchCondition.value.sortType = sortType;
+
   const response = await sortBoardByCategory(
     sortOrder,
     sortType,
@@ -69,24 +79,24 @@ const sortPostList = async (sortOrder: string, sortType: string, pageNumber: num
     searchCondition.value.searchType,
     searchCondition.value.searchText,
   );
+
+  await router.push({
+    name: 'Board',
+    query: {
+      searchType: searchCondition.value.searchType,
+      searchText: searchCondition.value.searchText,
+      sortOrder: sortOrder,
+      sortType: sortType,
+      pageNumber: pageNumber,
+    },
+  });
   posts.value = response.data;
 };
 
-// 기본적인 정렬
-const fetchPosts = async () => {
-  // 여기에 어떤 타입인지 전달
-  const response = await getAllBoard(searchCondition.value.searchType, searchCondition.value.searchText, currentPage.value);
-  posts.value = response.data;
-};
-
-const fetchPostCount = async () => {
-  const response = await getPostsCount(searchCondition.value.searchType, searchCondition.value.searchText);
-  totalPages.value = response.data;
-};
-
-const handlePageChange = async page => {
+// 페이지가 변경되면 실행되는 API
+const handlePageChange = async (page: number) => {
+  console.log(page);
   searchCondition.value.pageNumber = page;
-  console.log(searchCondition.value.pageNumber);
   // 2번으로 넘어갈때도 기준을 고정하고 넘어가야한다.
   if (searchCondition.value.sortType == '') {
     // 기본 조건의 정렬
@@ -103,11 +113,40 @@ const handlePageChange = async page => {
     );
     posts.value = response.data;
   }
+
+  await router.push({
+    name: 'Board',
+    query: {
+      searchType: searchCondition.value.searchType,
+      searchText: searchCondition.value.searchText,
+      sortOrder: searchCondition.value.sortOrder,
+      sortType: searchCondition.value.sortType,
+      pageNumber: searchCondition.value.pageNumber,
+    },
+  });
+};
+
+const fetchPosts = async () => {
+  await fetchPostCount();
+  const response = await getAllBoard(searchCondition.value.searchType, searchCondition.value.searchText, currentPage.value);
+  posts.value = response.data;
+};
+
+// 페이지 갯수 확인 함수
+const fetchPostCount = async () => {
+  const response = await getPostsCount(searchCondition.value.searchType, searchCondition.value.searchText);
+  totalPages.value = response.data;
 };
 
 onMounted(async () => {
-  await fetchPostCount();
-  await fetchPosts();
+  // sortOrder가 존재하면 sort가 생성
+  if (url.searchParams.get('sortOrder')) {
+    await sortPostList(url.searchParams.get('sortOrder'), url.searchParams.get('sortType'), url.searchParams.get('PageNumber'));
+  } else if (url.searchParams.get('searchType')) {
+    await basicSearchPostList(url.searchParams.get('searchType'), url.searchParams.get('searchText'));
+  } else {
+    await fetchPosts();
+  }
 });
 </script>
 

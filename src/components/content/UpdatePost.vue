@@ -14,13 +14,15 @@ import { Post } from '@/type/BoardStarType';
 import { getBoardById } from '@/api/auth';
 import { updatePost } from '@/api';
 import { useRouter } from 'vue-router';
+import { useNotifications } from '@/common/CommonNotify';
 
+const { positiveNotify } = useNotifications();
 const router = useRouter();
 const props = defineProps<{
-  id: string;
+  boardId: string;
 }>();
 const postContents = ref<Post | undefined>();
-const boardId = parseInt(props.id);
+const boardId = parseInt(props.boardId);
 const isDialogOpen = ref(false);
 
 const transformToPost = (serverData: Post) => {
@@ -47,6 +49,7 @@ const submitForm = async () => {
   try {
     isDialogOpen.value = false;
     await updatePost(postContents.value);
+    positiveNotify('게시글이 수정되었습니다');
     await router.push(`/${boardId}`);
   } catch (error) {
     console.log(error);

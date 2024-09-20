@@ -30,13 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import type { UserData } from '@/type/User';
+import { LoginData } from '@/type/User';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import { login } from '@/api/auth';
-
-type LoginData = Pick<UserData, 'memberEmail' | 'memberPassword'>;
 
 const router = useRouter();
 const isDialogOpen = ref(false);
@@ -56,7 +54,9 @@ const loginData = ref<LoginData>({
 
 const handleSubmit = async () => {
   try {
-    const response = await login(loginData.value.memberEmail, loginData.value.memberPassword);
+    console.log(loginData.value);
+    const response = await login(loginData.value);
+    // 여길 status로 다뤘으니 성공의 결과를 내보내면 된다,
     if (response.status === 200) {
       console.log(response);
       userStore.login(response.data.memberNickname);

@@ -58,7 +58,7 @@ import difficultyImage from '@/assets/난이도.png';
 import storyImage from '@/assets/스토리.png';
 import interiorImage from '@/assets/인테리어.png';
 import activityImage from '@/assets/활동성.png';
-import { checkNickname, findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
+import { findCommentsByBoardId, getBoardById } from '@/api/auth.ts';
 import { Comment } from '@/type/Comment.ts';
 import { BoardStar, Post } from '@/type/BoardStarType';
 import CommentForm from '@/components/post/CommentForm.vue';
@@ -67,59 +67,52 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import StarsComments from '@/components/post/StarsComments.vue';
 import PostHeadContents from '@/components/post/PostHeadContents.vue';
-import { negativeNotify } from '@/common/CommonNotify';
 import UpdateOrDeleteButton from '@/components/post/UpdateOrDeleteButton.vue';
+import { useNotifications } from '@/common/CommonNotify';
 
+const { negativeNotify, positiveNotify } = useNotifications();
 const router = useRouter();
 const images = [difficultyImage, storyImage, interiorImage, activityImage, horrorImage];
 const props = defineProps<{
-  id: string;
+  boardId: string;
 }>();
-const boardId = parseInt(props.id);
+const boardId = parseInt(props.boardId);
 const postHeadData = ref<Omit<Post, 'boardStar'> | undefined>();
 const boardStars = ref<BoardStar[] | undefined>([]);
 const comments = ref<Comment[] | undefined>([]);
-const isDialogOpen = ref(false);
-const modalMessage = ref('');
+const isDialogOpen = ref<boolean>(false);
+const modalMessage = ref<string>('');
 
-const transformToPostHeadData = (serverData: Post): Omit<Post, 'boardStars'> => {
+const transformToPostHeadData = (responseData: Post): Omit<Post, 'boardStars'> => {
   return {
-    boardId: serverData.boardId,
-    boardTitle: serverData.boardTitle,
-    boardContent: serverData.boardContent,
-    boardRegion: serverData.boardRegion,
-    memberNickname: serverData.memberNickname,
-    boardCreatedAt: serverData.boardCreatedAt,
-    boardView: serverData.boardView,
-    boardLikes: serverData.boardLikes,
+    boardId: responseData.boardId,
+    boardTitle: responseData.boardTitle,
+    boardContent: responseData.boardContent,
+    boardRegion: responseData.boardRegion,
+    memberNickname: responseData.memberNickname,
+    boardCreatedAt: responseData.boardCreatedAt,
+    boardView: responseData.boardView,
+    boardLikes: responseData.boardLikes,
   };
 };
 
-const transformToBoardStar = (serverData: BoardStar): Omit<BoardStar, 'boardId' | 'boardStarId'> => {
+const transformToBoardStar = (responseData: BoardStar): Omit<BoardStar, 'boardId' | 'boardStarId'> => {
   return {
-    boardStarType: serverData.boardStarType,
-    boardStarShortReview: serverData.boardStarShortReview,
-    boardStarRating: serverData.boardStarRating,
+    boardStarType: responseData.boardStarType,
+    boardStarShortReview: responseData.boardStarShortReview,
+    boardStarRating: responseData.boardStarRating,
   };
 };
 
-const transformToComment = (serverData): Comment => {
+const transformToComment = (responseData: Comment) => {
   return {
-    commentId: serverData.commentId,
-    memberId: serverData.memberId,
-    memberNickname: serverData.memberNickname,
-    commentUpdatedAt: serverData.commentUpdatedAt,
-    commentContent: serverData.commentContent,
+    commentId: responseData.commentId,
+    memberId: responseData.memberId,
+    memberNickname: responseData.memberNickname,
+    commentUpdatedAt: responseData.commentUpdatedAt,
+    commentContent: responseData.commentContent,
     showReplyForm: false,
-    isEdit: false,
   };
-};
-
-const fetchContentDetails = async () => {
-  const response = await getBoardById(boardId);
-  postHeadData.value = transformToPostHeadData(response.data);
-  boardStars.value = response.data.boardStars.map(transformToBoardStar);
-  comments.value = response.data.comments.map(transformToComment);
 };
 
 /* 게시글 삭제 여부 확인 모달*/
@@ -135,11 +128,12 @@ const closeModal = () => {
 /* 게시글 삭제 */
 const deletePost = async (boardId: number) => {
   await deletePostById(boardId);
+  positiveNotify('게시글이 삭제 되었습니다');
   await router.push('/');
 };
 
 /* 댓글 추가 */
-const addComment = async content => {
+const addComment = async (content: string) => {
   if (content.trim() === '') {
     negativeNotify('글을 입력해주세요');
     return;
@@ -153,29 +147,29 @@ const addComment = async content => {
   comments.value = response.data.map(transformToComment);
 };
 
-/*댓글 수정*/
-const editComment = async (content, id) => {
-  if (content.trim() === '') {
-    negativeNotify('글을 입력해주세요');
-    return;
-  }
-  const data = {
+/* 댓글 수정 */
+const editComment = async (content: string, id: number) => {
+  const response = await updateComment({
     commentContent: content,
     commentId: id,
     boardId: boardId,
-  };
-
-  const response = await updateComment(data);
+  });
   comments.value = response.data.map(transformToComment);
 };
 
 /* 댓글 삭제 */
 const deleteComment = async (commentId: number) => {
-  console.log(commentId);
   await deleteCommentById(commentId);
   /*삭제 후 해당 보드의 댓글 다시 로드*/
   const response = await findCommentsByBoardId(boardId);
   comments.value = response.data.map(transformToComment);
+};
+
+const fetchContentDetails = async () => {
+  const response = await getBoardById(boardId);
+  postHeadData.value = transformToPostHeadData(response.data);
+  boardStars.value = response.data.boardStars.map(transformToBoardStar);
+  comments.value = response.data.comments.map(transformToComment);
 };
 
 onMounted(() => {

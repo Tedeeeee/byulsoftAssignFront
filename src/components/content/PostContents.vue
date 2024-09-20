@@ -1,6 +1,4 @@
 <template>
-  <!--  제목, 카테고리  >> 하실 수 있으면 , 제목 + 내용, 제목 + 댓글 + 내용-->
-  <!--  난이도, 스토리, 인테리어, 공포도, 활동성 별로 SORTING -->
   <div class="flex items-center">
     <div style="flex: 3; margin-right: 10px">
       <q-select
@@ -53,8 +51,9 @@
 
 <script setup lang="ts">
 import { regionOptions } from '@/type/Contents';
-import { negativeNotify } from '@/common/CommonNotify';
+import { useNotifications } from '@/common/CommonNotify';
 
+const { negativeNotify } = useNotifications();
 const postContents = defineModel();
 const typeName = ['난이도', '스토리', '인테리어', '활동성', '공포도'];
 

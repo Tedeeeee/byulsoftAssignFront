@@ -98,11 +98,13 @@ const emailRules = [
   val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || '올바른 이메일을 입력해주세요',
   val => (registData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
+
 const nicknameRules = [
   val => (val && val.length >= 3) || '3글자 이상의 닉네임을 입력해주세요',
   val => /^[a-zA-Z가-힣]+$/.test(val) || '닉네임에는 특수문자와 공백을 사용할 수 없습니다.',
   val => (registData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
+
 const nameRules = [
   val => (val && val.length > 0) || '이름을 입력해주세요',
   val => val.length <= 18 || '이름은 최대 18글자까지 입력 가능합니다.',
@@ -128,44 +130,39 @@ const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registData
 const isNicknameValid = computed(() => registData.value.memberNickname.length >= 3);
 
 const emailCheckDuplicate = async () => {
+  if (!isEmailValid.value) {
+    negativeNotify('올바른 이메일을 입력해주세요');
+    return;
+  }
+
   try {
     const response = await checkEmail(registData.value.memberEmail);
-    if (response.data === '사용 가능한 이메일입니다.') {
+    if (response.statusCode === 200) {
       registData.value.emailCheck = true;
-      positiveNotify('사용 가능한 이메일입니다');
+      positiveNotify(response.message);
       emailInput.value.resetValidation();
-    } else {
-      registData.value.emailCheck = false;
-      negativeNotify('이메일 중복 체크에 실패하였습니다');
     }
   } catch (error) {
-    negativeNotify(error.response.data.message);
+    negativeNotify(error.message);
     registData.value.emailCheck = false;
-    emailInput.value.focus();
-  }
-  if (!isEmailValid.value) {
-    negativeNotify('올바른 이메일 형식을 작성해주세요');
-    return;
   }
 };
 
 const nicknameCheckDuplicate = async () => {
   if (!isNicknameValid.value) {
-    negativeNotify('3글자 이상의 닉네임을 입력해주세요');
+    negativeNotify('올바른 닉네임을 입력해주세요');
     return;
   }
+
   try {
     const response = await checkNickname(registData.value.memberNickname);
-    if (response.data === '사용 가능한 닉네임입니다.') {
+    if (response.statusCode === 200) {
       registData.value.nicknameCheck = true;
-      positiveNotify('사용 가능한 닉네임입니다');
-      nicknameInput.value.resetValidation();
-    } else {
-      registData.value.nicknameCheck = false;
-      negativeNotify('닉네임 중복 체크에 실패했습니다');
+      positiveNotify(response.message);
+      emailInput.value.resetValidation();
     }
   } catch (error) {
-    negativeNotify(error.response.data.message);
+    negativeNotify(error.message);
     registData.value.nicknameCheck = false;
   }
 };
@@ -173,19 +170,20 @@ const nicknameCheckDuplicate = async () => {
 const handleSubmit = async () => {
   try {
     await register(registData.value);
-    await router.push('/login');
-  } catch (err) {
-    const errorMessage = err.response.data.message;
+  } catch (error) {
+    if (error.statusCode === 409) {
+      negativeNotify(error.message);
+    }
+    const errorMessage = error.response.data.message;
     if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
-      negativeNotify(errorMessage);
       registData.value.email = '';
       registData.value.emailCheck = false;
     } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
-      negativeNotify(errorMessage);
       registData.value.nickname = '';
       registData.value.nicknameCheck = false;
     }
   }
+  await router.push('/login');
 };
 </script>
 

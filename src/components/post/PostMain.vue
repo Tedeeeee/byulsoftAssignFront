@@ -112,6 +112,7 @@ const transformToComment = (responseData: Comment) => {
     commentUpdatedAt: responseData.commentUpdatedAt,
     commentContent: responseData.commentContent,
     showReplyForm: false,
+    isEdit: false
   };
 };
 
@@ -144,7 +145,7 @@ const addComment = async (content: string) => {
     boardId: boardId,
     memberNickname: useUserStore().userNickname,
   });
-  comments.value = response.data.map(transformToComment);
+  comments.value = response.body.map(transformToComment);
 };
 
 /* 댓글 수정 */
@@ -154,7 +155,7 @@ const editComment = async (content: string, id: number) => {
     commentId: id,
     boardId: boardId,
   });
-  comments.value = response.data.map(transformToComment);
+  comments.value = response.body.map(transformToComment);
 };
 
 /* 댓글 삭제 */
@@ -162,14 +163,14 @@ const deleteComment = async (commentId: number) => {
   await deleteCommentById(commentId);
   /*삭제 후 해당 보드의 댓글 다시 로드*/
   const response = await findCommentsByBoardId(boardId);
-  comments.value = response.data.map(transformToComment);
+  comments.value = response.body.map(transformToComment);
 };
 
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  postHeadData.value = transformToPostHeadData(response.data);
-  boardStars.value = response.data.boardStars.map(transformToBoardStar);
-  comments.value = response.data.comments.map(transformToComment);
+  postHeadData.value = transformToPostHeadData(response.body);
+  boardStars.value = response.body.boardStars.map(transformToBoardStar);
+  comments.value = response.body.comments.map(transformToComment);
 };
 
 onMounted(() => {

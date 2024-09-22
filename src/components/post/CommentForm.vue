@@ -21,16 +21,16 @@
           <strong class="col">{{ comment.memberNickname }}</strong>
           <span>{{ comment.commentUpdatedAt }}</span>
           <div v-if="comment.memberNickname === nickname" class="comment-actions col-auto">
-            <q-btn flat label="수정" @click="showModal('수정하시겠습니까?')" color="primary" class="q-mr-xs" />
+            <q-btn flat label="수정" @click="showModal('수정하시겠습니까?', comment.commentId)" color="primary" class="q-mr-xs" />
             <q-btn flat label="삭제" @click="checkIfDelete(comment.commentId)" color="negative" class="q-mr-xs" />
           </div>
         </div>
         <q-separator />
-        <div v-if="isEdit">
+        <div v-if="comment.isEdit">
           <q-input filled v-model="comment.commentContent" label="댓글을 수정하세요" type="textarea" rows="3" class="q-mb-md" />
           <q-btn label="수정하기" @click="editComment(comment.commentContent, comment.commentId)" color="primary" />
         </div>
-        <p v-if="!isEdit" class="comment-text">{{ comment.commentContent }}</p>
+        <p v-if="!comment.isEdit" class="comment-text">{{ comment.commentContent }}</p>
         <div v-if="comment.showReplyForm" class="q-mt-md">
           <q-card flat bordered class="q-pa-md">
             <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
@@ -53,7 +53,6 @@ import { useNotifications } from '@/common/CommonNotify';
 
 const { negativeNotify } = useNotifications();
 const nickname = useUserStore().userNickname;
-const isEdit = ref<boolean>(false);
 const newComment = ref('');
 const modalMessage = ref<string>('');
 const isDialogOpen = ref<boolean>(false);
@@ -68,14 +67,16 @@ const emit = defineEmits<{
   (e: 'addComment', content: string): void;
 }>();
 
-const showModal = (message: string) => {
+const showModal = (message: string, commentId: number) => {
+  nowCommentId.value = commentId;
   modalMessage.value = message;
   isDialogOpen.value = true;
 };
 
 const closeModal = (message: string) => {
   if (message === '수정하시겠습니까?') {
-    isEdit.value = true;
+    const target = props.comments.find(comment => comment.commentId === nowCommentId.value);
+    target.isEdit = true;
   } else {
     deleteComment(nowCommentId.value);
   }
@@ -84,7 +85,7 @@ const closeModal = (message: string) => {
 
 const checkIfDelete = (commentId: number) => {
   nowCommentId.value = commentId;
-  showModal('삭제하시겠습니까?');
+  showModal('삭제하시겠습니까?', nowCommentId.value);
 };
 
 /* 삭제를 실행 */
@@ -98,7 +99,6 @@ const editComment = (commentContent: string, commentId: number) => {
     negativeNotify('내용을 작성해주세요');
     return;
   }
-  isEdit.value = false;
   emit('editComment', commentContent, commentId);
 };
 

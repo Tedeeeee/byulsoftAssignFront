@@ -10,8 +10,8 @@ export const updatePost = async data => {
   return instance.put('', data);
 };
 
-export const deletePostById = async id => {
-  const instance = createInstanceWithAuth(`boards/remove/${id}`);
+export const deletePostById = async (id: number) => {
+  const instance = createInstanceWithAuth(`boards/${id}`);
   return instance.delete('');
 };
 
@@ -20,7 +20,7 @@ export const insertComment = async data => {
   return instance.post('', data);
 };
 
-export const deleteCommentById = id => {
+export const deleteCommentById = (id: number) => {
   const instance = createInstanceWithAuth(`comments/${id}`);
   return instance.delete();
 };

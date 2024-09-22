@@ -5,4 +5,5 @@ export interface Comment {
   commentUpdatedAt: string;
   commentContent: string;
   showReplyForm: boolean;
+  isEdit: boolean;
 }

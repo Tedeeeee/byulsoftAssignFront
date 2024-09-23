@@ -97,7 +97,7 @@ const registData = ref<UserRegistData>({
 });
 
 const emailRules = [
-  val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || '올바른 이메일을 입력해주세요',
+  val => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val) || '올바른 이메일을 입력해주세요',
   val => (registData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
 
@@ -109,8 +109,8 @@ const nicknameRules = [
 
 const nameRules = [
   val => (val && val.length > 0) || '이름을 입력해주세요',
+  val => /^[a-zA-Z가-힣]+$/.test(val) || '이름에는 특수문자와 공백을 사용할 수 없습니다.',
   val => val.length <= 18 || '이름은 최대 18글자까지 입력 가능합니다.',
-  val => /^[a-zA-Z가-힣]+$/.test(val) || '닉네임에는 특수문자와 공백을 사용할 수 없습니다.',
 ];
 
 const checkPassword = [
@@ -124,7 +124,7 @@ const checkConfirmPassword = [
 ];
 
 const phoneNumberRules = [val => (val && val.length > 10) || '올바른 전화번호를 입력해주세요'];
-const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registData.value.memberEmail));
+const isEmailValid = computed(() => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(registData.value.memberEmail));
 
 const isNicknameValid = computed(() => registData.value.memberNickname.length >= 3);
 

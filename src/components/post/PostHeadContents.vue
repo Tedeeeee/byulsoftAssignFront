@@ -3,7 +3,6 @@
     <div class="row">
       <div class="left-section q-mr-md">
         <span style="font-size: 100px; font-weight: bold; margin-left: 20px">{{ postHeadData.boardId }}</span>
-        <!--        <q-img :src="imageSource" alt="사진" style="width: 150px; height: 150px" />-->
       </div>
       <q-separator vertical />
       <div class="right-section">

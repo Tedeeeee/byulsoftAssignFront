@@ -56,15 +56,16 @@
           </div>
           <q-input
             filled
-            maxlength="11"
-            v-model="registData.memberPhoneNumber"
+            v-model="phoneNumberInput"
             label="'-' 을 제외한 번호를 입력해주세요"
             type="tel"
+            mask="###-####-####"
             outlined
             lazy-rules
             :rules="phoneNumberRules"
             class="q-mb-md"
           />
+
           <q-btn label="회원가입" type="submit" color="primary" class="full-width" />
         </q-form>
       </q-card-section>
@@ -82,6 +83,7 @@ const { positiveNotify, negativeNotify } = useNotifications();
 const router = useRouter();
 const emailInput = ref<string>('');
 const nicknameInput = ref<string>('');
+const phoneNumberInput = ref<string>('');
 
 const registData = ref<UserRegistData>({
   memberEmail: '',
@@ -121,10 +123,7 @@ const checkConfirmPassword = [
   val => registData.value.memberPassword === val || '비밀번호가 일치하지 않습니다',
 ];
 
-const phoneNumberRules = [
-  val => (val && val.length > 0) || '전화번호를 입력해주세요',
-  val => /^[0-9]{10,11}$/.test(val) || '숫자만 입력해주세요',
-];
+const phoneNumberRules = [val => (val && val.length > 10) || '올바른 전화번호를 입력해주세요'];
 const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registData.value.memberEmail));
 
 const isNicknameValid = computed(() => registData.value.memberNickname.length >= 3);
@@ -135,15 +134,14 @@ const emailCheckDuplicate = async () => {
     return;
   }
 
-  try {
-    const response = await checkEmail(registData.value.memberEmail);
-    if (response.statusCode === 200) {
-      registData.value.emailCheck = true;
-      positiveNotify(response.message);
-      emailInput.value.resetValidation();
-    }
-  } catch (error) {
-    negativeNotify(error.message);
+  const response = await checkEmail(registData.value.memberEmail);
+  console.log(response);
+  if (response.statusCode === 201) {
+    registData.value.emailCheck = true;
+    positiveNotify(response.message);
+    emailInput.value.resetValidation();
+  } else {
+    negativeNotify(response.message);
     registData.value.emailCheck = false;
   }
 };
@@ -156,10 +154,10 @@ const nicknameCheckDuplicate = async () => {
 
   try {
     const response = await checkNickname(registData.value.memberNickname);
-    if (response.statusCode === 200) {
+    if (response.statusCode === 201) {
       registData.value.nicknameCheck = true;
       positiveNotify(response.message);
-      emailInput.value.resetValidation();
+      nicknameInput.value.resetValidation();
     }
   } catch (error) {
     negativeNotify(error.message);
@@ -168,20 +166,25 @@ const nicknameCheckDuplicate = async () => {
 };
 
 const handleSubmit = async () => {
+  registData.value.memberPhoneNumber = phoneNumberInput.value.replace(/\D/g, '');
+  console.log(registData.value);
   try {
-    await register(registData.value);
+    const response = await register(registData.value);
+    if (response.statusCode === 201) {
+      positiveNotify(response.message);
+    }
   } catch (error) {
     if (error.statusCode === 409) {
       negativeNotify(error.message);
     }
-    const errorMessage = error.response.data.message;
+    /*    const errorMessage = error.response.data.message;
     if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
       registData.value.email = '';
       registData.value.emailCheck = false;
     } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
       registData.value.nickname = '';
       registData.value.nicknameCheck = false;
-    }
+    }*/
   }
   await router.push('/login');
 };

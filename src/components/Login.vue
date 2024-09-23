@@ -55,7 +55,6 @@ const loginData = ref<LoginData>({
 const handleSubmit = async () => {
   try {
     const response = await login(loginData.value);
-    // 여길 status로 다뤘으니 성공의 결과를 내보내면 된다,
     if (response.statusCode === 200) {
       userStore.login(response.body.memberNickname);
       await router.push('/');

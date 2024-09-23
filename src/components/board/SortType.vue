@@ -79,7 +79,6 @@
           />
         </div>
       </div>
-
     </q-card>
   </div>
 </template>
@@ -87,38 +86,30 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import type { SearchCondition } from '@/type/Board';
-const props = defineProps<{
-  page: number;
-  sortOrder: string;
-  sortType: string;
-}>();
 
 const emit = defineEmits<{
-  (e: 'sort', sortOrder: string, sortType: string, pageNumber: number): void;
-  (e: 'resetSearchCondition'): void;
+  (e: 'sort'): void;
 }>();
+const searchCondition = defineModel();
 
-const sortData = ref<Pick<SearchCondition, 'searchType' | 'searchText' | 'pageNumber'>>({
-  sortOrder: props.sortOrder,
-  sortType: props.sortType,
-  pageNumber: props.page,
+const sortData = ref<Pick<SearchCondition, 'sortType' | 'sortOrder'>>({
+  sortOrder: searchCondition.value.sortOrder,
+  sortType: searchCondition.value.sortType,
 });
 
-console.log(sortData.value);
-
 const handleSort = (sortOrder: string, sortType: string) => {
-  sortData.value.sortOrder = sortOrder;
-  sortData.value.sortType = sortType;
+  searchCondition.value.sortOrder = sortOrder;
+  searchCondition.value.sortType = sortType;
 
-  emit('sort', sortOrder, sortType, props.page);
+  emit('sort');
 };
 
 const isActive = (sortType: string, sortOrder: string) => {
-  return sortData.value.sortType === sortType && sortData.value.sortOrder === sortOrder;
+  return searchCondition.value.sortType === sortType && searchCondition.value.sortOrder === sortOrder;
 };
 
 onMounted(() => {
-  isActive(props.sortType, props.sortType);
+  isActive(searchCondition.value.sortType, searchCondition.value.sortType);
 });
 </script>
 

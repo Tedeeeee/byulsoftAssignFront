@@ -27,19 +27,22 @@ import { regionOptions } from '@/type/Contents';
 import { ref, watch } from 'vue';
 
 const selectCategory = ['제목', '지역'];
-const props = defineProps<{
-  contents: string;
-  type: string;
-}>();
-const searchText = ref<string>(props.contents || '');
-const searchType = ref<string>(props.type || '제목');
+// const props = defineProps<{
+//   contents: string;
+//   type: string;
+// }>();
+const searchCondition = defineModel();
+const searchText = ref<string>(searchCondition.value.searchText || '');
+const searchType = ref<string>(searchCondition.value.searchType || '제목');
 
 const emit = defineEmits<{
-  (e: 'searchPost', searchType: string, searchText: string): void;
+  (e: 'searchPost'): void;
 }>();
 
 const searchPost = () => {
-  emit('searchPost', searchType.value, searchText.value);
+  searchCondition.value.searchText = searchText.value;
+  searchCondition.value.searchType = searchType.value;
+  emit('searchPost');
 };
 
 watch(searchType, newValue => {

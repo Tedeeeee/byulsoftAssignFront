@@ -15,7 +15,7 @@ import { useRouter } from 'vue-router';
 import { Post } from '@/type/BoardStarType';
 import { useNotifications } from '@/common/CommonNotify';
 
-const { negativeNotify } = useNotifications();
+const { negativeNotify, positiveNotify } = useNotifications();
 const router = useRouter();
 
 const postContents = ref<Post>({
@@ -42,7 +42,8 @@ const submitForm = async () => {
   }
 
   try {
-    await insertPost(postContents.value);
+    const response = await insertPost(postContents.value);
+    positiveNotify(response.message);
     await router.push('/');
   } catch (error) {
     const errorMessage = error.response.data.errors[0].defaultMessage;

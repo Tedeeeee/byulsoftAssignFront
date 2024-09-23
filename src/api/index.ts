@@ -27,7 +27,7 @@ export const deleteCommentById = (id: number) => {
 
 export const logout = () => {
   const instance = createInstanceWithAuth('members/logout');
-  return instance.patch();
+  return instance.delete();
 };
 
 export const updateComment = data => {

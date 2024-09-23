@@ -16,7 +16,7 @@ import { updatePost } from '@/api';
 import { useRouter } from 'vue-router';
 import { useNotifications } from '@/common/CommonNotify';
 
-const { positiveNotify } = useNotifications();
+const { positiveNotify, negativeNotify } = useNotifications();
 const router = useRouter();
 const props = defineProps<{
   boardId: string;
@@ -48,11 +48,11 @@ const fetchContentDetails = async () => {
 const submitForm = async () => {
   try {
     isDialogOpen.value = false;
-    await updatePost(postContents.value);
-    positiveNotify('게시글이 수정되었습니다');
+    const response = await updatePost(postContents.value);
+    positiveNotify(response.message);
     await router.push(`/${boardId}`);
   } catch (error) {
-    console.log(error);
+    negativeNotify(error.message);
   }
 };
 

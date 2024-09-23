@@ -39,20 +39,20 @@ export const getAllBoard = async (searchType: string, searchText: string, pageNu
   });
 };
 
-export const sortBoardByCategory = async (
+export const getBoardList = async (
+  searchType: string,
+  searchText: string,
   sortOrder: string,
   sortType: string,
   pageNumber: number,
-  searchType: string,
-  searchText: string,
 ): Promise<SearchCondition> => {
-  return instance.get('boards/sort', {
+  return instance.get('boards', {
     params: {
+      searchType: searchType,
+      searchText: searchText,
       sortOrder: sortOrder,
       sortType: sortType,
       pageNumber: pageNumber,
-      searchType: searchType,
-      searchText: searchText,
     },
   });
 };

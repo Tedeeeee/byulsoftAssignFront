@@ -112,7 +112,7 @@ const transformToComment = (responseData: Comment) => {
     commentUpdatedAt: responseData.commentUpdatedAt,
     commentContent: responseData.commentContent,
     showReplyForm: false,
-    isEdit: false
+    isEdit: false,
   };
 };
 
@@ -128,9 +128,13 @@ const closeModal = () => {
 
 /* 게시글 삭제 */
 const deletePost = async (boardId: number) => {
-  await deletePostById(boardId);
-  positiveNotify('게시글이 삭제 되었습니다');
-  await router.push('/');
+  try {
+    const response = await deletePostById(boardId);
+    positiveNotify(response.message);
+    await router.push('/');
+  } catch (error) {
+    negativeNotify(error.message);
+  }
 };
 
 /* 댓글 추가 */
@@ -145,6 +149,7 @@ const addComment = async (content: string) => {
     boardId: boardId,
     memberNickname: useUserStore().userNickname,
   });
+  positiveNotify(response.message);
   comments.value = response.body.map(transformToComment);
 };
 
@@ -155,15 +160,22 @@ const editComment = async (content: string, id: number) => {
     commentId: id,
     boardId: boardId,
   });
+  positiveNotify(response.message);
   comments.value = response.body.map(transformToComment);
 };
 
 /* 댓글 삭제 */
 const deleteComment = async (commentId: number) => {
-  await deleteCommentById(commentId);
-  /*삭제 후 해당 보드의 댓글 다시 로드*/
-  const response = await findCommentsByBoardId(boardId);
-  comments.value = response.body.map(transformToComment);
+  try {
+    const response = await deleteCommentById(commentId);
+    positiveNotify(response.message);
+
+    /*삭제 후 해당 보드의 댓글 다시 로드*/
+    const responseComment = await findCommentsByBoardId(boardId);
+    comments.value = responseComment.body.map(transformToComment);
+  } catch (error) {
+    negativeNotify(error.message);
+  }
 };
 
 const fetchContentDetails = async () => {
@@ -192,28 +204,6 @@ onMounted(() => {
   background-color: #f5f5f5;
 }
 
-.left-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.right-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.info-section {
-  margin-bottom: 0.5rem;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .q-pa-md {
   padding: 0.5rem;
 }
@@ -228,12 +218,6 @@ onMounted(() => {
 .review-summary-card {
   margin-top: 16px;
   margin-bottom: 16px;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
 }
 
 .text-center {

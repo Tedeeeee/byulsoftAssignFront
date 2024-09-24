@@ -55,7 +55,6 @@ const loginData = ref<LoginData>({
 const handleSubmit = async () => {
   try {
     const response = await login(loginData.value);
-    console.log(response);
     if (response.statusCode === 200) {
       userStore.login(response.body.memberNickname);
       await router.push('/');

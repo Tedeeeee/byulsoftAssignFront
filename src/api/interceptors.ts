@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { Notify } from 'quasar';
-import router from '@/router';
 
 export const setInterceptors = instance => {
   instance.interceptors.request.use(

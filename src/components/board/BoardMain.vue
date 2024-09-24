@@ -101,6 +101,10 @@ const resetSearchCondition = async () => {
 
 const fetchPosts = async () => {
   const response = await getBoardList(searchCondition.value);
+  console.log(response);
+  if (response.statusCode == 400) {
+    await resetSearchCondition();
+  }
   posts.value = response.body.boards;
   totalPages.value = response.body.totalPages;
 };

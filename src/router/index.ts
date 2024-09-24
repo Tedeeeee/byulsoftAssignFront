@@ -6,7 +6,6 @@ import InsertPost from '@/components/content/InsertPost.vue';
 import UpdatePost from '@/components/content/UpdatePost.vue';
 import PostDetail from '@/components/post/PostMain.vue';
 
-console.log('test');
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [

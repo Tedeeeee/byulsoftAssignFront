@@ -69,7 +69,6 @@ const showModal = (message: string, commentId: number) => {
 };
 
 const closeModal = (message: string) => {
-  console.log();
   if (message === '수정하시겠습니까?') {
     editComment(newUpdateComment.value, nowCommentId.value);
   } else if (message === '삭제하시겠습니까?') {
@@ -105,7 +104,6 @@ const editComment = (newUpdateComment: string, commentId: number) => {
     negativeNotify('내용을 작성해주세요');
     return;
   }
-  console.log(newUpdateComment);
   emit('editComment', newUpdateComment, commentId);
 };
 

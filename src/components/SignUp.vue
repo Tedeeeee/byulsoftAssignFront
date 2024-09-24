@@ -57,7 +57,7 @@
           <q-input
             filled
             v-model="phoneNumberInput"
-            label="'-' 을 제외한 번호를 입력해주세요"
+            label="숫자만 입력해주세요"
             type="tel"
             mask="###-####-####"
             outlined
@@ -110,7 +110,6 @@ const nicknameRules = [
 const nameRules = [
   val => (val && val.length > 0) || '이름을 입력해주세요',
   val => /^[a-zA-Z가-힣]+$/.test(val) || '이름에는 특수문자와 공백을 사용할 수 없습니다.',
-  val => val.length <= 18 || '이름은 최대 18글자까지 입력 가능합니다.',
 ];
 
 const checkPassword = [
@@ -123,7 +122,7 @@ const checkConfirmPassword = [
   val => registData.value.memberPassword === val || '비밀번호가 일치하지 않습니다',
 ];
 
-const phoneNumberRules = [val => (val && val.length > 10) || '올바른 전화번호를 입력해주세요'];
+const phoneNumberRules = [val => (val && val.length > 12) || '올바른 전화번호를 입력해주세요'];
 const isEmailValid = computed(() => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(registData.value.memberEmail));
 
 const isNicknameValid = computed(() => registData.value.memberNickname.length >= 3);
@@ -133,13 +132,7 @@ const emailCheckDuplicate = async () => {
     negativeNotify('올바른 이메일을 입력해주세요');
     return;
   }
-
-  try {
-    const response = await checkEmail(registData.value.memberEmail);
-    console.log(response);
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await checkEmail(registData.value.memberEmail);
   if (response.statusCode === 201) {
     registData.value.emailCheck = true;
     positiveNotify(response.message);
@@ -155,42 +148,36 @@ const nicknameCheckDuplicate = async () => {
     negativeNotify('올바른 닉네임을 입력해주세요');
     return;
   }
-
-  try {
-    const response = await checkNickname(registData.value.memberNickname);
-    if (response.statusCode === 201) {
-      registData.value.nicknameCheck = true;
-      positiveNotify(response.message);
-      nicknameInput.value.resetValidation();
-    }
-  } catch (error) {
-    negativeNotify(error.message);
-    registData.value.nicknameCheck = false;
+  const response = await checkNickname(registData.value.memberNickname);
+  if (response.statusCode === 201) {
+    registData.value.nicknameCheck = true;
+    positiveNotify(response.message);
+    nicknameInput.value.resetValidation();
+  } else {
+    negativeNotify(response.message);
+    registData.value.emailCheck = false;
   }
 };
 
 const handleSubmit = async () => {
-  registData.value.memberPhoneNumber = phoneNumberInput.value.replace(/\D/g, '');
-  console.log(registData.value);
-  try {
-    const response = await register(registData.value);
-    if (response.statusCode === 201) {
-      positiveNotify(response.message);
-    }
-  } catch (error) {
-    if (error.statusCode === 409) {
-      negativeNotify(error.message);
-    }
-    /*    const errorMessage = error.response.data.message;
-    if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
+  registData.value.memberPhoneNumber = phoneNumberInput.value.replace(/-/g, '');
+
+  const response = await register(registData.value);
+  if (response.statusCode === 201) {
+    positiveNotify(response.message);
+    await router.push('/login');
+  } else {
+    if (response.body.message === '사용할 수 없는 이메일입니다') {
       registData.value.email = '';
       registData.value.emailCheck = false;
-    } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
+      emailInput.value.focus();
+    } else if (response.body.message === '사용할 수 없는 닉네임입니다') {
       registData.value.nickname = '';
       registData.value.nicknameCheck = false;
-    }*/
+      nicknameInput.value.focus();
+    }
+    negativeNotify(response.body.message);
   }
-  await router.push('/login');
 };
 </script>
 

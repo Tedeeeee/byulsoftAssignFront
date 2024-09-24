@@ -5,7 +5,7 @@
       <div class="flex justify-center items-center" style="height: 30%">
         <div class="row q-gutter-sm" style="width: 100%">
           <div class="col-3 q-pa-sm">
-            <q-select filled v-model="searchType" :options="selectCategory" label="카테고리" />
+            <q-select filled v-model="searchType" :options="selectCategory" label="카테고리" @update:model-value="changeSearchText" />
           </div>
           <div v-if="searchType === '제목'" class="col-7 q-pa-sm">
             <q-input standout="bg-teal text-white" v-model="searchText" @keyup.enter="searchPost" label="검색" />
@@ -24,13 +24,9 @@
 
 <script setup lang="ts">
 import { regionOptions } from '@/type/Contents';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const selectCategory = ['제목', '지역'];
-// const props = defineProps<{
-//   contents: string;
-//   type: string;
-// }>();
 const searchCondition = defineModel();
 const searchText = ref<string>(searchCondition.value.searchText || '');
 const searchType = ref<string>(searchCondition.value.searchType || '제목');
@@ -45,13 +41,13 @@ const searchPost = () => {
   emit('searchPost');
 };
 
-watch(searchType, newValue => {
-  if (newValue == '지역') {
+const changeSearchText = (newVal: string) => {
+  if (newVal == '지역') {
     searchText.value = '서울';
   } else {
     searchText.value = '';
   }
-});
+};
 </script>
 
 <style scoped>

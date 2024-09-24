@@ -17,8 +17,8 @@
       <q-card-section class="q-pt-none">
         <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
-          <q-input v-model="loginData.memberEmail" label="Email" type="email" outlined class="q-mb-md" />
-          <q-input v-model="loginData.memberPassword" label="Password" type="password" outlined class="q-mb-md" />
+          <q-input v-model="loginData.memberEmail" label="Email" type="email" outlined class="q-mb-md" autocomplete="off" />
+          <q-input v-model="loginData.memberPassword" label="Password" type="password" outlined class="q-mb-md" autocomplete="off" />
           <q-btn label="Login" type="submit" color="primary" class="full-width" />
           <div class="text-center q-mt-md">
             <q-btn flat label="혹시 회원이 아니신가요?" to="/signUp" class="custom-link" />
@@ -55,9 +55,12 @@ const loginData = ref<LoginData>({
 const handleSubmit = async () => {
   try {
     const response = await login(loginData.value);
+    console.log(response);
     if (response.statusCode === 200) {
       userStore.login(response.body.memberNickname);
       await router.push('/');
+    } else {
+      showModal();
     }
   } catch (error) {
     console.log(error);

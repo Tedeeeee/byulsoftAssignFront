@@ -21,22 +21,16 @@
           <strong class="col">{{ comment.memberNickname }}</strong>
           <span>{{ comment.commentUpdatedAt }}</span>
           <div v-if="comment.memberNickname === nickname" class="comment-actions col-auto">
-            <q-btn flat label="수정" @click="showModal('수정하시겠습니까?', comment.commentId)" color="primary" class="q-mr-xs" />
+            <q-btn flat label="수정" @click="openEditComment(comment.commentId)" color="primary" class="q-mr-xs" />
             <q-btn flat label="삭제" @click="checkIfDelete(comment.commentId)" color="negative" class="q-mr-xs" />
           </div>
         </div>
         <q-separator />
         <div v-if="comment.isEdit">
-          <q-input filled v-model="comment.commentContent" label="댓글을 수정하세요" type="textarea" rows="3" class="q-mb-md" />
-          <q-btn label="수정하기" @click="editComment(comment.commentContent, comment.commentId)" color="primary" />
+          <q-input filled v-model="newUpdateComment" label="댓글을 수정하세요" type="textarea" rows="3" class="q-mb-md" />
+          <q-btn label="수정하기" @click="showModal('수정하시겠습니까?', comment.commentId)" color="primary" />
         </div>
         <p v-if="!comment.isEdit" class="comment-text">{{ comment.commentContent }}</p>
-        <div v-if="comment.showReplyForm" class="q-mt-md">
-          <q-card flat bordered class="q-pa-md">
-            <q-input filled v-model="comment.newReply" label="답변을 작성하세요" type="textarea" rows="3" class="q-mb-md" />
-            <q-btn label="답변하기" @click="addReply(index)" color="primary" />
-          </q-card>
-        </div>
       </q-card>
     </div>
     <q-card flat bordered class="q-pa-md">
@@ -53,10 +47,11 @@ import { useNotifications } from '@/common/CommonNotify';
 
 const { negativeNotify } = useNotifications();
 const nickname = useUserStore().userNickname;
-const newComment = ref('');
+const newComment = ref<string>('');
+const newUpdateComment = ref<string>('');
+const nowCommentId = ref<number>(0);
 const modalMessage = ref<string>('');
 const isDialogOpen = ref<boolean>(false);
-const nowCommentId = ref<number>(0);
 const props = defineProps<{
   comments: Comment[];
 }>();
@@ -74,13 +69,24 @@ const showModal = (message: string, commentId: number) => {
 };
 
 const closeModal = (message: string) => {
+  console.log();
   if (message === '수정하시겠습니까?') {
-    const target = props.comments.find(comment => comment.commentId === nowCommentId.value);
-    target.isEdit = true;
-  } else {
+    editComment(newUpdateComment.value, nowCommentId.value);
+  } else if (message === '삭제하시겠습니까?') {
     deleteComment(nowCommentId.value);
   }
   isDialogOpen.value = false;
+};
+
+const openEditComment = (commentId: number) => {
+  props.comments.find(comment => {
+    if (comment.commentId === commentId) {
+      newUpdateComment.value = comment.commentContent;
+      comment.isEdit = true;
+    } else {
+      comment.isEdit = false;
+    }
+  });
 };
 
 const checkIfDelete = (commentId: number) => {
@@ -94,12 +100,13 @@ const deleteComment = (commentId: number) => {
 };
 
 /* 수정하기를 누르면 실행 */
-const editComment = (commentContent: string, commentId: number) => {
-  if (commentContent.trim() === '') {
+const editComment = (newUpdateComment: string, commentId: number) => {
+  if (newUpdateComment.trim() === '') {
     negativeNotify('내용을 작성해주세요');
     return;
   }
-  emit('editComment', commentContent, commentId);
+  console.log(newUpdateComment);
+  emit('editComment', newUpdateComment, commentId);
 };
 
 const submitComment = () => {

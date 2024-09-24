@@ -134,8 +134,12 @@ const emailCheckDuplicate = async () => {
     return;
   }
 
-  const response = await checkEmail(registData.value.memberEmail);
-  console.log(response);
+  try {
+    const response = await checkEmail(registData.value.memberEmail);
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
   if (response.statusCode === 201) {
     registData.value.emailCheck = true;
     positiveNotify(response.message);

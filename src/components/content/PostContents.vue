@@ -6,7 +6,8 @@
         :options="regionOptions"
         label="지역"
         lazy-rules
-        :rules="[val => !!val || notifyError('지역을 입력해주세요')]"
+        outlined
+        :rules="[val => !!val || '지역을 입력해주세요']"
         filled
         class="custom-input"
       />
@@ -17,9 +18,9 @@
         v-model="postContents.boardTitle"
         label="제목"
         filled
-        autofocus
+        outlined
         lazy-rules
-        :rules="[val => !!val || notifyError('제목을 입력해주세요')]"
+        :rules="[val => !!val || '제목을 입력해주세요']"
         class="custom-input"
       />
     </div>
@@ -45,21 +46,15 @@
     type="textarea"
     rows="10"
     filled
-    :rules="[val => !!val || notifyError('총평을 입력해주세요')]"
+    :rules="[val => !!val || '총평을 입력해주세요']"
   />
 </template>
 
 <script setup lang="ts">
 import { regionOptions } from '@/type/Contents';
-import { useNotifications } from '@/common/CommonNotify';
 
-const { negativeNotify } = useNotifications();
 const postContents = defineModel();
 const typeName = ['난이도', '스토리', '인테리어', '활동성', '공포도'];
-
-const notifyError = (message: string) => {
-  negativeNotify(message);
-};
 </script>
 
 <style scoped>

@@ -1,9 +1,7 @@
-import { createInstance } from '@/api/interceptors';
 import type { Post } from '@/type/BoardStarType';
 import type { SearchCondition } from '@/type/Board';
 import type { LoginData } from '@/type/User';
-
-const instance = createInstance();
+import { instance } from '@/api/interceptors';
 
 export const checkNickname = (nickname: string) => {
   return instance.get('members/nicknames/check', {
@@ -39,20 +37,14 @@ export const getAllBoard = async (searchType: string, searchText: string, pageNu
   });
 };
 
-export const getBoardList = async (
-  searchType: string,
-  searchText: string,
-  sortOrder: string,
-  sortType: string,
-  pageNumber: number,
-): Promise<SearchCondition> => {
+export const getBoardList = async (searchCondition: SearchCondition): Promise<SearchCondition> => {
   return instance.get('boards', {
     params: {
-      searchType: searchType,
-      searchText: searchText,
-      sortOrder: sortOrder,
-      sortType: sortType,
-      pageNumber: pageNumber,
+      searchType: searchCondition.searchType,
+      searchText: searchCondition.searchText,
+      sortOrder: searchCondition.sortOrder,
+      sortType: searchCondition.sortType,
+      pageNumber: searchCondition.pageNumber,
     },
   });
 };
@@ -63,13 +55,4 @@ export const getBoardById = async (boardId: number): Promise<Post> => {
 
 export const findCommentsByBoardId = (boardId: number) => {
   return instance.get(`comments/${boardId}`);
-};
-
-export const getPostsCount = (searchType: string, searchText: string) => {
-  return instance.get('boards/count', {
-    params: {
-      searchType: searchType,
-      searchText: searchText,
-    },
-  });
 };

@@ -144,13 +144,21 @@ const addComment = async (content: string) => {
     return;
   }
 
-  const response = await insertComment({
-    commentContent: content,
-    boardId: boardId,
-    memberNickname: useUserStore().userNickname,
-  });
-  positiveNotify(response.message);
-  comments.value = response.body.map(transformToComment);
+  try {
+    const response = await insertComment({
+      commentContent: content,
+      boardId: boardId,
+      memberNickname: useUserStore().userNickname,
+    });
+
+    positiveNotify(response.message);
+    comments.value = response.body.map(transformToComment);
+  } catch (error) {
+    if (error.status == 401) {
+      negativeNotify('로그인이 필요한 서비스입니다');
+      await router.push('/login');
+    }
+  }
 };
 
 /* 댓글 수정 */

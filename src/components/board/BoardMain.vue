@@ -42,7 +42,7 @@ const searchCondition = ref<SearchCondition>({
   searchText: route.query.searchText || '',
   sortOrder: route.query.sortOrder || '',
   sortType: route.query.sortType || '',
-  pageNumber: route.query.pageNumber || currentPage.value,
+  pageNumber: parseInt(route.query.pageNumber) || currentPage.value,
 });
 
 const detailPost = (boardId: number) => {
@@ -50,6 +50,7 @@ const detailPost = (boardId: number) => {
 };
 
 const sortPostList = async () => {
+  searchCondition.value.pageNumber = 1;
   await fetchPosts();
 
   await router.push({
@@ -59,7 +60,7 @@ const sortPostList = async () => {
       searchText: searchCondition.value.searchText,
       sortOrder: searchCondition.value.sortOrder,
       sortType: searchCondition.value.sortType,
-      pageNumber: searchCondition.value.pageNumber,
+      pageNumber: 1,
     },
   });
 };
@@ -99,13 +100,7 @@ const resetSearchCondition = async () => {
 };
 
 const fetchPosts = async () => {
-  const response = await getBoardList(
-    searchCondition.value.searchType,
-    searchCondition.value.searchText,
-    searchCondition.value.sortOrder,
-    searchCondition.value.sortType,
-    searchCondition.value.pageNumber,
-  );
+  const response = await getBoardList(searchCondition.value);
   posts.value = response.body.boards;
   totalPages.value = response.body.totalPages;
 };

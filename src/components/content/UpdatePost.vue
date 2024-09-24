@@ -49,8 +49,12 @@ const submitForm = async () => {
   try {
     isDialogOpen.value = false;
     const response = await updatePost(postContents.value);
+    console.log(response);
     positiveNotify(response.message);
     await router.push(`/${boardId}`);
+    if (response.statusCode === 500) {
+      negativeNotify(response.message);
+    }
   } catch (error) {
     negativeNotify(error.message);
   }

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { Notify } from 'quasar';
+import router from '@/router';
 
 export const setInterceptors = instance => {
   instance.interceptors.request.use(
@@ -13,7 +15,7 @@ export const setInterceptors = instance => {
       return response.data;
     },
     error => {
-      return Promise.reject(error.response.data);
+      return Promise.reject(error);
     },
   );
 
@@ -28,11 +30,14 @@ export const createInstance = () => {
   return setInterceptors(instance);
 };
 
-export const createInstanceWithAuth = url => {
+export const createNewInstanceWithAuth = () => {
   const instance = axios.create({
-    baseURL: `/api/${url}`,
+    baseURL: `/api/`,
     withCredentials: true,
   });
 
   return setInterceptors(instance);
 };
+
+export const instance = createInstance();
+export const instanceWithAuth = createNewInstanceWithAuth();

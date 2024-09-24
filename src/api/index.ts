@@ -1,41 +1,29 @@
-import { createInstanceWithAuth } from '@/api/interceptors';
+import { instanceWithAuth } from '@/api/interceptors';
 
 export const insertPost = data => {
-  const instance = createInstanceWithAuth('boards');
-  return instance.post('', data);
+  return instanceWithAuth.post('boards', data);
 };
 
 export const updatePost = async data => {
-  const instance = createInstanceWithAuth('boards');
-  return instance.put('', data);
+  return instanceWithAuth.put('boards', data);
 };
 
 export const deletePostById = async (id: number) => {
-  const instance = createInstanceWithAuth(`boards/${id}`);
-  return instance.delete('');
+  return instanceWithAuth.delete(`boards/${id}`);
 };
 
 export const insertComment = async data => {
-  const instance = createInstanceWithAuth(`comments`);
-  return instance.post('', data);
+  return instanceWithAuth.post('comments', data);
 };
 
 export const deleteCommentById = (id: number) => {
-  const instance = createInstanceWithAuth(`comments/${id}`);
-  return instance.delete();
+  return instanceWithAuth.delete(`comments/${id}`);
 };
 
 export const logout = () => {
-  const instance = createInstanceWithAuth('members/logout');
-  return instance.delete();
+  return instanceWithAuth.delete('members/logout');
 };
 
 export const updateComment = data => {
-  const instance = createInstanceWithAuth('comments');
-  return instance.put('', data);
-};
-
-export const deleteBoard = id => {
-  const instance = createInstanceWithAuth(`boards/${id}`);
-  return instance.delete();
+  return instanceWithAuth.put('comments', data);
 };

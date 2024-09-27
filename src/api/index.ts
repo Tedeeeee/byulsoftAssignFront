@@ -9,7 +9,9 @@ export const updatePost = async data => {
 };
 
 export const deletePostById = async (id: number) => {
-  return instanceWithAuth.delete(`boards/${id}`);
+  const response = await instanceWithAuth.delete(`boards/${id}`);
+
+  return response.body;
 };
 
 export const insertComment = async data => {

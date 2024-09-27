@@ -1,5 +1,17 @@
 <template>
-  <search v-model="searchCondition" :contents="searchCondition.searchText" :type="searchCondition.searchType" @searchPost="sortPostList" />
+  <div>
+    <q-dialog v-model="isDialogOpen">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">검색 결과가 존재하지 않습니다</div>
+        </q-card-section>
+        <q-card-actions align="center">
+          <q-btn flat label="검색 초기화" @click="closeModal" color="primary" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
+  <search v-model="searchCondition" @searchPost="sortPostList" />
   <sort-type v-model="searchCondition" @sort="sortPostList" />
   <reset-search @reset-search-condition="resetSearchCondition" />
   <q-page padding>
@@ -9,7 +21,7 @@
         <q-pagination
           v-model="currentPage"
           color="black"
-          :max="totalPages"
+          :max="totalPages || 1"
           :max-pages="7"
           :boundary-numbers="false"
           @update:model-value="handlePageChange"
@@ -34,6 +46,7 @@ const router = useRouter();
 const posts = ref<Post[]>([]);
 const currentPage = ref<number>(1);
 const totalPages = ref<number>(1);
+const isDialogOpen = ref<boolean>(false);
 
 // 초기화를 할때 URL을 가져와야 한다
 const route = useRoute();
@@ -96,21 +109,17 @@ const resetSearchCondition = async () => {
   await router.push({ name: 'Board' });
 
   await fetchPosts();
-  window.location.reload();
 };
 
 const fetchPosts = async () => {
   const response = await getBoardList(searchCondition.value);
-  console.log(response);
-  if (response.statusCode == 400) {
-    await resetSearchCondition();
-  }
-  posts.value = response.body.boards;
-  totalPages.value = response.body.totalPages;
+  posts.value = response.data.body.boards;
+  totalPages.value = response.data.body.totalPages;
 };
 
 onMounted(async () => {
   currentPage.value = parseInt(route.query.pageNumber, 10) || 1;
+  searchCondition.value.pageNumber = parseInt(route.query.pageNumber, 10) || 1;
   await fetchPosts();
 });
 </script>

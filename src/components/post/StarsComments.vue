@@ -7,7 +7,7 @@
       <div class="right-section">
         <div class="row q-mt-sm">
           <div class="col">
-            <q-rating v-model="star.boardStarRating" max="5" readonly />
+            <q-rating :model-value="star.boardStarRating" max="5" readonly />
           </div>
         </div>
         <div class="info-section q-mb-sm">
@@ -20,8 +20,7 @@
 
 <script setup lang="ts">
 import type { BoardStar } from '@/type/BoardStarType';
-
-const props = defineProps<{
+defineProps<{
   star: BoardStar;
   image: string;
 }>();

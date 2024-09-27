@@ -20,16 +20,6 @@
             <span>작성시간</span><br />
             <span class="col-3">{{ postHeadData.boardCreatedAt }}</span>
           </div>
-          <q-separator vertical />
-          <div class="col">
-            <span>조회수</span><br />
-            <span class="col-2">{{ postHeadData.boardView }}</span>
-          </div>
-          <q-separator vertical />
-          <div class="col">
-            <span>좋아요</span><br />
-            <span class="col-2">{{ postHeadData.boardLikes }}</span>
-          </div>
         </div>
       </div>
     </div>
@@ -39,7 +29,7 @@
 <script setup lang="ts">
 import { Post } from '@/type/BoardStarType';
 
-const props = defineProps<{
+defineProps<{
   postHeadData: Omit<Post, 'boardStars'>;
 }>();
 </script>

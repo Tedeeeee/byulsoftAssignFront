@@ -41,15 +41,9 @@ const submitForm = async () => {
     }
   }
 
-  try {
-    const response = await insertPost(postContents.value);
-    positiveNotify(response.message);
+  const response = await insertPost(postContents.value);
+  if (response.body.statusCode === 201) {
     await router.push('/');
-  } catch (error) {
-    const errorMessage = error.response.data.errors[0].defaultMessage;
-    if (errorMessage === '체크되지 않은 별점이 존재합니다') {
-      negativeNotify(errorMessage);
-    }
   }
 };
 </script>

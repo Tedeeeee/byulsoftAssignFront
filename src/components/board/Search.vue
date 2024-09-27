@@ -42,7 +42,7 @@ const searchPost = () => {
 };
 
 const changeSearchText = (newVal: string) => {
-  if (newVal == '지역') {
+  if (newVal === '지역') {
     searchText.value = '서울';
   } else {
     searchText.value = '';
@@ -67,10 +67,10 @@ const changeSearchText = (newVal: string) => {
 }
 
 .title {
-  font-size: 50px;
+  font-size: 30px;
   font-weight: bold;
   text-align: center;
   margin-bottom: 20px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 </style>

@@ -42,10 +42,13 @@ const transformToPost = (serverData: Post) => {
 /* boardId를 통해 데이터를 다시 받아서 셋팅을 한다 */
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  postContents.value = transformToPost(response.body);
+  postContents.value = transformToPost(response.data.body);
 };
 
 const submitForm = async () => {
+  isDialogOpen.value = false;
+  const response = await updatePost(postContents.value);
+  console.log(response);
   try {
     isDialogOpen.value = false;
     const response = await updatePost(postContents.value);

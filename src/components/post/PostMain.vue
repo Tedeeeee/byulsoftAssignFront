@@ -152,7 +152,7 @@ const addComment = async (content: string) => {
     });
 
     positiveNotify(response.message);
-    comments.value = response.body.map(transformToComment);
+    comments.value = response.data.body.map(transformToComment);
   } catch (error) {
     if (error.status == 401) {
       negativeNotify('로그인이 필요한 서비스입니다');
@@ -169,7 +169,7 @@ const editComment = async (content: string, id: number) => {
     boardId: boardId,
   });
   positiveNotify(response.message);
-  comments.value = response.body.map(transformToComment);
+  comments.value = response.data.body.map(transformToComment);
 };
 
 /* 댓글 삭제 */
@@ -188,9 +188,9 @@ const deleteComment = async (commentId: number) => {
 
 const fetchContentDetails = async () => {
   const response = await getBoardById(boardId);
-  postHeadData.value = transformToPostHeadData(response.body);
-  boardStars.value = response.body.boardStars.map(transformToBoardStar);
-  comments.value = response.body.comments.map(transformToComment);
+  postHeadData.value = transformToPostHeadData(response.data.body);
+  boardStars.value = response.data.body.boardStars.map(transformToBoardStar);
+  comments.value = response.data.body.comments.map(transformToComment);
 };
 
 onMounted(() => {

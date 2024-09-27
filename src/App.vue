@@ -25,7 +25,7 @@
     </q-header>
 
     <q-page-container class="q-pa-none">
-      <router-view />
+      <router-view :key="router.fullPath" />
     </q-page-container>
 
     <q-footer reveal elevated class="bg-grey-8 text-white" height-hint="50">
@@ -43,23 +43,22 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import logo from './assets/로고.png';
 import { logout } from '@/api';
-import { onMounted } from 'vue';
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const goHome = () => {
-  router.push('/');
+const goHome = async () => {
+  // 이거 어떻게 하지???
+  // 초기화 시키기
+  await router.push('/signUp');
+  await router.push('/');
 };
 
 const handleLogout = async () => {
   userStore.logout();
   await logout();
-  location.reload();
   await router.push('/');
 };
-
-onMounted(() => {});
 </script>
 
 <style scoped>

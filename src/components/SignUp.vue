@@ -16,6 +16,7 @@
               lazy-rules
               :rules="emailRules"
               class="input-field"
+              autocomplete="off"
             />
             <q-btn label="중복체크" @click="emailCheckDuplicate" color="primary" class="check-btn" />
           </div>
@@ -28,6 +29,7 @@
             lazy-rules
             :rules="checkPassword"
             class="q-mb-md"
+            autocomplete="off"
           />
           <q-input
             filled
@@ -38,6 +40,7 @@
             lazy-rules
             :rules="checkConfirmPassword"
             class="q-mb-md"
+            autocomplete="off"
           />
           <q-input filled maxlength="18" v-model="registData.memberName" label="이름" lazy-rules :rules="nameRules" class="q-mb-md" />
           <div class="input-btn-container">
@@ -51,6 +54,7 @@
               lazy-rules
               :rules="nicknameRules"
               class="input-field"
+              autocomplete="off"
             />
             <q-btn label="중복체크" @click="nicknameCheckDuplicate" color="primary" class="check-btn" />
           </div>
@@ -64,6 +68,7 @@
             lazy-rules
             :rules="phoneNumberRules"
             class="q-mb-md"
+            autocomplete="off"
           />
 
           <q-btn label="회원가입" type="submit" color="primary" class="full-width" />
@@ -103,7 +108,7 @@ const emailRules = [
 
 const nicknameRules = [
   val => (val && val.length >= 3) || '3글자 이상의 닉네임을 입력해주세요',
-  val => /^[a-zA-Z가-힣]+$/.test(val) || '닉네임에는 특수문자와 공백을 사용할 수 없습니다.',
+  val => /^[a-zA-Z가-힝]+$/.test(val) || '닉네임에는 특수문자와 공백을 사용할 수 없습니다.',
   val => (registData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
 
@@ -167,16 +172,16 @@ const handleSubmit = async () => {
     positiveNotify(response.message);
     await router.push('/login');
   } else {
-    if (response.body.message === '사용할 수 없는 이메일입니다') {
+    if (response.data.body.message === '사용할 수 없는 이메일입니다') {
       registData.value.email = '';
       registData.value.emailCheck = false;
       emailInput.value.focus();
-    } else if (response.body.message === '사용할 수 없는 닉네임입니다') {
+    } else if (response.data.body.message === '사용할 수 없는 닉네임입니다') {
       registData.value.nickname = '';
       registData.value.nicknameCheck = false;
       nicknameInput.value.focus();
     }
-    negativeNotify(response.body.message);
+    negativeNotify(response.data.body.message);
   }
 };
 </script>

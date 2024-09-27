@@ -113,11 +113,6 @@ const submitComment = () => {
     newComment.value = '';
   }
 };
-
-/*/!* 수정 댓글 open or close *!/
-const toggleReply = index => {
-  comments.value[index].showReplyForm = !comments.value[index].showReplyForm;
-};*/
 </script>
 
 <style scoped>

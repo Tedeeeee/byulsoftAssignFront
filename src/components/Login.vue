@@ -33,12 +33,10 @@
 import { LoginData } from '@/type/User';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/useUserStore';
 import { login } from '@/api/auth';
 
 const router = useRouter();
 const isDialogOpen = ref(false);
-const userStore = useUserStore();
 
 const showModal = () => {
   isDialogOpen.value = true;
@@ -53,18 +51,8 @@ const loginData = ref<LoginData>({
 });
 
 const handleSubmit = async () => {
-  try {
-    const response = await login(loginData.value);
-    if (response.statusCode === 200) {
-      userStore.login(response.body.memberNickname);
-      await router.push('/');
-    } else {
-      showModal();
-    }
-  } catch (error) {
-    console.log(error);
-    showModal();
-  }
+  await login(loginData.value);
+  await router.push('/');
 };
 </script>
 

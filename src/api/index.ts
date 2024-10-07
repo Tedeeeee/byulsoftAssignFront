@@ -1,41 +1,31 @@
-import { createInstanceWithAuth } from '@/api/common/interceptors';
+import { instanceWithAuth } from '@/api/interceptors';
 
-export const healthCheck = () => {
-  const instance = createInstanceWithAuth('members/healthCheck');
-  return instance.get();
+export const insertPost = data => {
+  return instanceWithAuth.post('boards', data);
 };
 
-export const insertContents = data => {
-  const instance = createInstanceWithAuth('boards/insertContents');
-  return instance.post('', data);
+export const updatePost = async data => {
+  return instanceWithAuth.put('boards', data);
 };
 
-export const updateContents = async data => {
-  const instance = createInstanceWithAuth('boards/updateContents');
-  return instance.patch('', data);
+export const deletePostById = async (id: number) => {
+  const response = await instanceWithAuth.delete(`boards/${id}`);
+
+  return response.body;
 };
 
-export const insertComment = data => {
-  const instance = createInstanceWithAuth(`comments`);
-  return instance.post('', data);
+export const insertComment = async data => {
+  return instanceWithAuth.post('comments', data);
 };
 
-export const deleteContents = id => {
-  const instance = createInstanceWithAuth(`comments/${id}`);
-  return instance.delete();
+export const deleteCommentById = (id: number) => {
+  return instanceWithAuth.delete(`comments/${id}`);
 };
 
-export const deleteRefreshToken = () => {
-  const instance = createInstanceWithAuth('members');
-  return instance.patch();
+export const logout = () => {
+  return instanceWithAuth.delete('members/logout');
 };
 
-export const editCommentText = data => {
-  const instance = createInstanceWithAuth('comments');
-  return instance.patch('', data);
-};
-
-export const deleteBoard = id => {
-  const instance = createInstanceWithAuth(`boards/${id}`);
-  return instance.delete();
+export const updateComment = data => {
+  return instanceWithAuth.put('comments', data);
 };

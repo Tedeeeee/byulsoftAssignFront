@@ -1,14 +1,18 @@
-import { createInstance } from '@/api/common/interceptors';
 import type { Post } from '@/type/BoardStarType';
-
-const instance = createInstance();
+import type { SearchCondition } from '@/type/Board';
+import type { LoginData } from '@/type/User';
+import { instance } from '@/api/interceptors';
 
 export const checkNickname = (nickname: string) => {
-  return instance.get('members/checkNickname', { params: { nickname: nickname } });
+  return instance.get('members/nicknames/check', {
+    params: {
+      nickname: nickname,
+    },
+  });
 };
 
 export const checkEmail = (email: string) => {
-  return instance.get('members/checkEmail', {
+  return instance.get('members/emails/check', {
     params: {
       email: email,
     },
@@ -19,40 +23,36 @@ export const register = userData => {
   return instance.post('members/register', userData);
 };
 
-export const login = (email: string, password: string) => {
-  return instance.post('login', { email, password });
+export const login = (loginData: LoginData) => {
+  return instance.post('login', loginData);
 };
 
-export const getAllBoard = (pageNumber: number) => {
-  return instance.get('boards/allBoard', {
+export const getAllBoard = async (searchType: string, searchText: string, pageNumber: number): Promise<Post[]> => {
+  return instance.get('boards/basic', {
     params: {
-      pn: pageNumber,
+      searchType: searchType,
+      searchText: searchText,
+      pageNumber: pageNumber,
     },
   });
 };
 
-export const sortBoardByCategory = async (sortName: string, sortType: string, pn: number): Promise<any> => {
-  return instance.get('boards/sort', {
+export const getBoardList = async (searchCondition: SearchCondition): Promise<SearchCondition> => {
+  return instance.get('boards', {
     params: {
-      sortType: sortType,
-      sortName: sortName,
-      pn: pn,
+      searchType: searchCondition.searchType,
+      searchText: searchCondition.searchText,
+      sortOrder: searchCondition.sortOrder,
+      sortType: searchCondition.sortType,
+      pageNumber: searchCondition.pageNumber,
     },
   });
 };
 
-export const getBoardById = async (id): Promise<Post> => {
-  return instance.get(`boards/detail/${id}`);
+export const getBoardById = async (boardId: number): Promise<Post> => {
+  return instance.get(`boards/${boardId}`);
 };
 
 export const findCommentsByBoardId = (boardId: number) => {
   return instance.get(`comments/${boardId}`);
-};
-
-export const getSortBoardByCategory = (name: string) => {
-  return instance.get(`boards/${name}`);
-};
-
-export const getPostsCount = () => {
-  return instance.get('boards/countPage');
 };

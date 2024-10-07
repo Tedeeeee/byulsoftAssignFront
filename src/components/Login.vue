@@ -17,8 +17,8 @@
       <q-card-section class="q-pt-none">
         <div class="title">로그인</div>
         <q-form @submit="handleSubmit">
-          <q-input v-model="loginData.email" label="Email" type="email" outlined class="q-mb-md" />
-          <q-input v-model="loginData.password" label="Password" type="password" outlined class="q-mb-md" />
+          <q-input v-model="loginData.memberEmail" label="Email" type="email" outlined class="q-mb-md" autocomplete="off" />
+          <q-input v-model="loginData.memberPassword" label="Password" type="password" outlined class="q-mb-md" autocomplete="off" />
           <q-btn label="Login" type="submit" color="primary" class="full-width" />
           <div class="text-center q-mt-md">
             <q-btn flat label="혹시 회원이 아니신가요?" to="/signUp" class="custom-link" />
@@ -30,17 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import type { UserData } from '@/type/User';
+import { LoginData } from '@/type/User';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/useUserStore';
 import { login } from '@/api/auth';
-
-type LoginData = Pick<UserData, 'email' | 'password'>;
 
 const router = useRouter();
 const isDialogOpen = ref(false);
-const userStore = useUserStore();
 
 const showModal = () => {
   isDialogOpen.value = true;
@@ -50,23 +46,13 @@ const closeModal = () => {
 };
 
 const loginData = ref<LoginData>({
-  email: '',
-  password: '',
+  memberEmail: '',
+  memberPassword: '',
 });
 
 const handleSubmit = async () => {
-  try {
-    const response = await login(loginData.value.email, loginData.value.password);
-    if (response.status === 200) {
-      console.log(response);
-      userStore.login(response.data);
-      router.push('/');
-    }
-  } catch (error) {
-    // 오류가 발생한 경우 모달을 띄운다
-    console.log(error);
-    showModal();
-  }
+  await login(loginData.value);
+  await router.push('/');
 };
 </script>
 

@@ -8,62 +8,69 @@
             <q-input
               ref="emailInput"
               filled
-              maxlength="320"
-              v-model="signUpData.email"
+              maxlength="50"
+              v-model="registData.memberEmail"
               label="이메일"
               type="email"
               outlined
+              lazy-rules
               :rules="emailRules"
               class="input-field"
+              autocomplete="off"
             />
             <q-btn label="중복체크" @click="emailCheckDuplicate" color="primary" class="check-btn" />
           </div>
           <q-input
             filled
-            v-model="signUpData.password"
+            v-model="registData.memberPassword"
             label="비밀번호"
             type="password"
             outlined
             lazy-rules
             :rules="checkPassword"
             class="q-mb-md"
+            autocomplete="off"
           />
           <q-input
             filled
-            v-model="signUpData.confirmPassword"
+            v-model="registData.confirmPassword"
             label="비밀번호 재확인"
             type="password"
             outlined
             lazy-rules
             :rules="checkConfirmPassword"
             class="q-mb-md"
+            autocomplete="off"
           />
-          <q-input filled maxlength="18" v-model="signUpData.username" label="이름" lazy-rules :rules="nameRules" class="q-mb-md" />
+          <q-input filled maxlength="18" v-model="registData.memberName" label="이름" lazy-rules :rules="nameRules" class="q-mb-md" />
           <div class="input-btn-container">
             <q-input
               ref="nicknameInput"
               filled
               maxlength="10"
-              v-model="signUpData.nickname"
+              v-model="registData.memberNickname"
               label="닉네임"
               outlined
               lazy-rules
               :rules="nicknameRules"
               class="input-field"
+              autocomplete="off"
             />
             <q-btn label="중복체크" @click="nicknameCheckDuplicate" color="primary" class="check-btn" />
           </div>
           <q-input
             filled
-            maxlength="11"
-            v-model="signUpData.phoneNum"
-            label="'-' 을 제외한 번호를 입력해주세요"
+            v-model="phoneNumberInput"
+            label="숫자만 입력해주세요"
             type="tel"
+            mask="###-####-####"
             outlined
             lazy-rules
             :rules="phoneNumberRules"
             class="q-mb-md"
+            autocomplete="off"
           />
+
           <q-btn label="회원가입" type="submit" color="primary" class="full-width" />
         </q-form>
       </q-card-section>
@@ -71,40 +78,43 @@
   </q-page>
 </template>
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
-import type { UserRegistData, UserData } from '@/type/User';
+import { computed, ref } from 'vue';
+import type { UserRegistData } from '@/type/User';
 import { useRouter } from 'vue-router';
 import { register, checkNickname, checkEmail } from '@/api/auth';
-import { useQuasar } from 'quasar';
+import { useNotifications } from '@/common/CommonNotify';
 
+const { positiveNotify, negativeNotify } = useNotifications();
 const router = useRouter();
-const $q = useQuasar();
-const emailInput = ref(null);
-const nicknameInput = ref(null);
+const emailInput = ref<string>('');
+const nicknameInput = ref<string>('');
+const phoneNumberInput = ref<string>('');
 
-const signUpData = ref<UserRegistData>({
-  email: '',
+const registData = ref<UserRegistData>({
+  memberEmail: '',
   emailCheck: false,
-  password: '',
+  memberPassword: '',
   confirmPassword: '',
-  username: '',
-  nickname: '',
+  memberName: '',
+  memberNickname: '',
   nicknameCheck: false,
-  phoneNum: '',
+  memberPhoneNum: '',
 });
 
-const emailRules = computed(() => [
-  val => (signUpData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
-  val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || '올바른 이메일을 입력해주세요',
-]);
-const nicknameRules = [
-  val => (val && val.length > 0) || '닉네임을 입력해주세요',
-  val => (signUpData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
+const emailRules = [
+  val => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val) || '올바른 이메일을 입력해주세요',
+  val => (registData.value.emailCheck || !val ? true : '중복체크를 완료해주세요'),
 ];
+
+const nicknameRules = [
+  val => (val && val.length >= 3) || '3글자 이상의 닉네임을 입력해주세요',
+  val => /^[a-zA-Z가-힝]+$/.test(val) || '닉네임에는 특수문자와 공백을 사용할 수 없습니다.',
+  val => (registData.value.nicknameCheck || !val ? true : '중복체크를 완료해주세요'),
+];
+
 const nameRules = [
   val => (val && val.length > 0) || '이름을 입력해주세요',
-  val => val.length <= 18 || '이름은 최대 18글자까지 입력 가능합니다.',
-  val => /^[a-zA-Z가-힣]*$/.test(val) || '이름에는 특수문자를 사용할 수 없습니다.',
+  val => /^[a-zA-Z가-힣]+$/.test(val) || '이름에는 특수문자와 공백을 사용할 수 없습니다.',
 ];
 
 const checkPassword = [
@@ -114,93 +124,64 @@ const checkPassword = [
 
 const checkConfirmPassword = [
   val => (val && val.length > 0) || '비밀번호를 입력해주세요',
-  val => signUpData.value.password === signUpData.value.confirmPassword || '비밀번호가 일치하지 않습니다',
+  val => registData.value.memberPassword === val || '비밀번호가 일치하지 않습니다',
 ];
 
-const phoneNumberRules = [
-  val => (val && val.length > 0) || '전화번호를 입력해주세요',
-  val => /^[0-9]{10,11}$/.test(val) || "' - ' 을 제외한 번호를 입력해주세요",
-];
+const phoneNumberRules = [val => (val && val.length > 12) || '올바른 전화번호를 입력해주세요'];
+const isEmailValid = computed(() => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(registData.value.memberEmail));
+
+const isNicknameValid = computed(() => registData.value.memberNickname.length >= 3);
 
 const emailCheckDuplicate = async () => {
-  try {
-    const response = await checkEmail(signUpData.value.email);
-    if (response.data === '사용 가능한 이메일입니다.') {
-      signUpData.value.emailCheck = true;
-      await nextTick();
-      emailInput.value?.focus();
-    }
-  } catch (error) {
-    console.log(error);
-    $q.notify({
-      type: 'negative',
-      message: '이메일 중복 체크를 다시 진행해주세요',
-      position: 'top',
-    });
-    signUpData.value.emailCheck = false;
-    await nextTick();
-    emailInput.value?.focus();
+  if (!isEmailValid.value) {
+    negativeNotify('올바른 이메일을 입력해주세요');
+    return;
+  }
+  const response = await checkEmail(registData.value.memberEmail);
+  if (response.statusCode === 201) {
+    registData.value.emailCheck = true;
+    positiveNotify(response.message);
+    emailInput.value.resetValidation();
+  } else {
+    negativeNotify(response.message);
+    registData.value.emailCheck = false;
   }
 };
 
 const nicknameCheckDuplicate = async () => {
-  await nextTick();
-  nicknameInput.value.focus();
-  try {
-    const response = await checkNickname(signUpData.value.nickname);
-    console.log(response);
-    if (response.data === '사용 가능한 닉네임입니다.') {
-      signUpData.value.nicknameCheck = true;
-      await nextTick();
-      nicknameInput.value?.focus();
-    }
-  } catch (error) {
-    console.log(error);
-    $q.notify({
-      type: 'negative',
-      message: '닉네임 중복 체크를 다시 진행해주세요',
-      position: 'top',
-    });
-    signUpData.value.nicknameCheck = false;
-    await nextTick();
-    nicknameInput.value?.focus();
+  if (!isNicknameValid.value) {
+    negativeNotify('올바른 닉네임을 입력해주세요');
+    return;
+  }
+  const response = await checkNickname(registData.value.memberNickname);
+  if (response.statusCode === 201) {
+    registData.value.nicknameCheck = true;
+    positiveNotify(response.message);
+    nicknameInput.value.resetValidation();
+  } else {
+    negativeNotify(response.message);
+    registData.value.emailCheck = false;
   }
 };
 
 const handleSubmit = async () => {
-  console.log('회원가입이 진행됩니다.');
-  const userData = ref<UserData>({
-    email: signUpData.value.email,
-    password: signUpData.value.password,
-    name: signUpData.value.username,
-    nickname: signUpData.value.nickname,
-    phoneNumber: signUpData.value.phoneNum,
-  });
+  registData.value.memberPhoneNumber = phoneNumberInput.value.replace(/-/g, '');
 
-  try {
-    const response = await register(userData.value);
-    console.log(response);
-    router.push('/login');
-  } catch (err) {
-    const errorMessage = err.response.data.message;
-    console.log(err.response.data.message);
-    if (errorMessage === '해당 이메일은 이미 사용중입니다.') {
-      $q.notify({
-        type: 'negative',
-        message: errorMessage,
-        position: 'top',
-      });
-      signUpData.value.email = '';
-      signUpData.value.emailCheck = false;
-    } else if (errorMessage === '이미 존재하는 닉네임 입니다') {
-      $q.notify({
-        type: 'negative',
-        message: '닉네임 중복 체크를 다시 진행해주세요',
-        position: 'top',
-      });
-      signUpData.value.nickname = '';
-      signUpData.value.nicknameCheck = false;
+  const response = await register(registData.value);
+  if (response.statusCode === 201) {
+    positiveNotify(response.message);
+    await router.push('/login');
+  } else {
+    if (response.data.body.message === '사용할 수 없는 이메일입니다') {
+      registData.value.email = '';
+      registData.value.emailCheck = false;
+      emailInput.value.focus();
+    } else if (response.data.body.message === '사용할 수 없는 닉네임입니다') {
+      registData.value.nickname = '';
+      registData.value.nicknameCheck = false;
+      nicknameInput.value.focus();
     }
+    negativeNotify(response.data.body.message);
   }
 };
 </script>

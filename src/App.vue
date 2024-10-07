@@ -13,7 +13,7 @@
           <q-btn to="/" color="black" label="목록" />
           <template v-if="userStore.isLoggedIn">
             <q-btn flat :label="userStore.userNickname" class="custom-link" />
-            <q-btn to="/insertWrite" color="black" label="글쓰기" />
+            <q-btn to="/insertPost" color="black" label="글쓰기" />
             <q-btn @click="handleLogout" color="black" label="로그아웃" />
           </template>
           <template v-else>
@@ -25,7 +25,7 @@
     </q-header>
 
     <q-page-container class="q-pa-none">
-      <router-view />
+      <router-view :key="router.fullPath" />
     </q-page-container>
 
     <q-footer reveal elevated class="bg-grey-8 text-white" height-hint="50">
@@ -42,28 +42,23 @@
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore';
 import logo from './assets/로고.png';
-import { deleteRefreshToken } from '@/api';
-import { computed, ref } from 'vue';
+import { logout } from '@/api';
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const goHome = () => {
-  router.push('/');
+const goHome = async () => {
+  // 이거 어떻게 하지???
+  // 초기화 시키기
+  await router.push('/signUp');
+  await router.push('/');
 };
-
-const showSearch = computed(() => {
-  return router.path('/');
-});
 
 const handleLogout = async () => {
-  // 로그아웃 api 제작
   userStore.logout();
-  await deleteRefreshToken();
-  router.push('/');
+  await logout();
+  await router.push('/');
 };
-
-const searchQuery = ref('');
 </script>
 
 <style scoped>
